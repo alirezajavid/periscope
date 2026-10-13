@@ -1,1 +1,45 @@
-// app global css
+// The IRANSans font files are not in the repo yet; until they are added the stack falls back to Tahoma.
+
+// Quasar's normalize.sass hard-codes `direction: ltr`; this build has no RTL stylesheet, so set it here.
+html,
+body,
+#q-app {
+  direction: rtl;
+}
+
+body {
+  font-family: $typography-font-family;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  line-height: 1.5;
+  letter-spacing: normal;
+  font-weight: 700;
+}
+
+.page {
+  padding: 16px;
+}
+
+.page-title {
+  font-size: 22px;
+  margin: 0 0 16px;
+}
+
+// Latin-script cells (emails, ids, URLs) stay left-to-right inside the RTL table
+.ltr {
+  direction: ltr;
+  unicode-bidi: plaintext;
+  text-align: start;
+}
+
+.toolbar-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
