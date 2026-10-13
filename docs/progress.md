@@ -81,3 +81,6 @@ API is complete (see `docs/api.md`). Left: app screens (home, episode, search, a
 ## Problems
 - Found by browser testing: `throttle:N,M` without a prefix shares one counter between every route (progress/heartbeat calls ate the payment and login quota). Every throttled route now has its own prefix (test added).
 - CI `api` job failed once because tests depended on `SANCTUM_STATEFUL_DOMAINS` in `.env`; fixed in `TestCase`.
+
+- Admin UI: RTL by CSS like the app; CSRF token comes from `/api/admin/csrf-token`; logging in regenerates the session, so the shared client refetches the token and repeats a request once after a 419. The setup QR is shown as an `<img>` with a data URL, never `v-html`.
+- Problem: one commit (6962207) reached `main` directly because the ship helper was run while on `main`; the helper now refuses `main`. Nothing in it was wrong in CI terms, but it skipped the PR step.
