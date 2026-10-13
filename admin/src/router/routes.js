@@ -11,6 +11,14 @@ const routes = [
       { path: 'users', name: 'users', component: () => import('@/pages/UsersPage.vue') },
       { path: 'users/:id', name: 'user', component: () => import('@/pages/UserDetailPage.vue') },
       { path: 'payments', name: 'payments', component: () => import('@/pages/PaymentsPage.vue') },
+      {
+        path: 'questions',
+        name: 'questions',
+        component: () => import('@/pages/QuestionsPage.vue'),
+      },
+      { path: 'stats', name: 'stats', component: () => import('@/pages/StatsPage.vue') },
+      { path: 'leaks', name: 'leaks', component: () => import('@/pages/LeaksPage.vue') },
+      { path: 'settings', name: 'settings', component: () => import('@/pages/SettingsPage.vue') },
     ],
   },
   {
