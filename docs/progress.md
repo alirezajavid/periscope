@@ -30,7 +30,10 @@ Read this file and `CLAUDE.md` first in every new session.
 - feat/seeders: `php artisan db:seed` (local only) + `docs/api.md`, dev switch `WATERMARK_ENABLED=false` (refused in production). Merged, together with feat/password-rules (server enforces the 3 rules the signup screen shows).
 
 ## In progress
-- feat/app-foundation-auth: app styles/components/layouts + all auth screens (login, register, verify email, forgot/reset password, phone OTP, Google), small API additions (`PUT /api/email`, question limit 500, per-route throttle prefixes).
+- feat/app-content-player: main layout + tab bar + mini player, home, episode, search, full player (preparing state, speed, sleep timer, ±15 s, Media Session, progress + one-device lock), ask, account, plans, payment, payment history, support, change password, maintenance page.
+
+## Done (app)
+- feat/app-foundation-auth (merged): app styles/components/layouts + all auth screens (login, register, verify email, forgot/reset password, phone OTP, Google), small API additions (`PUT /api/email`, question limit 500, per-route throttle prefixes).
 
 ## Remaining
 API is complete (see `docs/api.md`). Left: app screens (home, episode, search, ask, account, plans, payment, player + offline cache SW, static pages, states), then the admin panel UI.

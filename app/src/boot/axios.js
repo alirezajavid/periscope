@@ -19,7 +19,7 @@ export default defineBoot(({ app, router, store }) => {
   handlers.onUnauthenticated = () => {
     const auth = useAuthStore(store)
     if (!auth.isLoggedIn) return
-    auth.user = null
+    auth.clearSession()
     router.push({ name: 'login', query: { expired: '1' } })
   }
 })
