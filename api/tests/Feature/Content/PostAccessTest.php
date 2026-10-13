@@ -46,10 +46,10 @@ it('shows a non-subscriber only the preview of a premium post', function (?User 
 it('gives subscribers and admins the full content', function (User $viewer) {
     $post = premiumPost();
 
-    asUser($viewer)->getJson("/api/posts/{$post->id}")->assertOk()
+    $response = asUser($viewer)->getJson("/api/posts/{$post->id}")->assertOk()
         ->assertJsonPath('data.locked', false)
-        ->assertJsonPath('data.body', SECRET_BODY)
         ->assertJsonPath('data.embed_url', 'https://www.aparat.com/video/video/embed/videohash/abc/vt/frame');
+    expect(withoutMarks($response->json('data.body')))->toBe(SECRET_BODY);
 })->with([
     'subscriber' => [fn () => subscriber()],
     'admin' => [fn () => User::factory()->admin()->create()],

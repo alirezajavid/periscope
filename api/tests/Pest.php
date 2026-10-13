@@ -59,3 +59,9 @@ function asUser(?User $user = null): TestCase
 {
     return test()->actingAs($user ?? User::factory()->create());
 }
+
+/** Remove the invisible per-reader marks (U+200B, U+2060) from text. */
+function withoutMarks(string $text): string
+{
+    return str_replace(["\u{200B}", "\u{2060}"], '', $text);
+}
