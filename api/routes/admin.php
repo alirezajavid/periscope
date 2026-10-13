@@ -13,6 +13,8 @@ use App\Http\Controllers\Admin\PaymentController;
 use App\Http\Controllers\Admin\PaymentMethodController;
 use App\Http\Controllers\Admin\PlanController;
 use App\Http\Controllers\Admin\PostController;
+use App\Http\Controllers\Admin\QuestionController;
+use App\Http\Controllers\Admin\SettingController;
 use App\Http\Controllers\Admin\TagController;
 use App\Http\Controllers\Admin\UserSubscriptionController;
 use App\Http\Controllers\Admin\WatermarkController;
@@ -47,6 +49,11 @@ Route::middleware(['auth:sanctum', 'admin.idle', 'admin'])->group(function () {
     Route::get('/posts/{post}/watermarks', [WatermarkController::class, 'index']);
     Route::post('/posts/{post}/watermarks/retry', [WatermarkController::class, 'retry']);
 
+    Route::get('/questions', [QuestionController::class, 'index']);
+    Route::post('/questions/{question}/star', [QuestionController::class, 'star']);
+    Route::post('/questions/{question}/answer', [QuestionController::class, 'answer']);
+    Route::get('/settings', [SettingController::class, 'index']);
+    Route::put('/settings', [SettingController::class, 'update']);
     Route::get('/stats/listening', ListeningStatsController::class);
     Route::get('/leak-checks', [LeakCheckController::class, 'index']);
     Route::post('/leak-checks/text', [LeakCheckController::class, 'text'])->middleware('throttle:30,1');
