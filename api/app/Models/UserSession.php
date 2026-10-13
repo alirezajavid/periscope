@@ -2,10 +2,12 @@
 
 namespace App\Models;
 
+use App\Enums\LoginMethod;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Session;
 
 #[Fillable(['user_id', 'session_id', 'browser_family', 'os_family', 'ip', 'last_activity_at'])]
@@ -54,6 +56,16 @@ class UserSession extends Model
         };
 
         return ['browser' => $browser, 'os' => $os];
+    }
+
+    /** Sign the user in on this request: fresh session id, session registry, last login, audit event. */
+    public static function signIn(Request $request, User $user, LoginMethod $method): void
+    {
+        Auth::guard('web')->login($user);
+        $request->session()->regenerate();
+        static::start($request, $user);
+        $user->forceFill(['last_login_at' => now()])->save();
+        LoginEvent::record($request, $method, true, $user);
     }
 
     /** Register the current (freshly regenerated) session for the user. */

@@ -18,6 +18,7 @@ class UserResource extends JsonResource
             'email' => $this->email,
             'email_verified' => $this->email_verified_at !== null,
             'phone' => $this->phone,
+            'phone_verified' => $this->phone_verified_at !== null,
             'notify_new_episode' => $this->notify_new_episode,
             'preferred_mirror' => $this->preferred_mirror,
         ];
