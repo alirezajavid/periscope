@@ -30,6 +30,11 @@ class AdminPostResource extends JsonResource
             'audio_size' => $this->audio_size,
             'audio_duration' => $this->audio_duration,
             'audio_mirrored_at' => $this->audio_mirrored_at,
+            'watermarks' => $this->when(isset($this->watermarks_ready), fn () => [
+                'ready' => (int) $this->watermarks_ready,
+                'building' => (int) $this->watermarks_building,
+                'failed' => (int) $this->watermarks_failed,
+            ]),
             'tags' => $this->whenLoaded('tags', fn () => $this->tags->pluck('name')),
             'created_by' => $this->created_by,
             'created_at' => $this->created_at,

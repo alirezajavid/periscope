@@ -12,6 +12,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Carbon;
 use Mews\Purifier\Facades\Purifier;
@@ -21,6 +22,9 @@ use Mews\Purifier\Facades\Purifier;
  * @property PostAccess $access
  * @property PostStatus $status
  * @property Carbon|null $published_at
+ * @property int|null $watermarks_ready Only present after scopeWithWatermarkCounts().
+ * @property int|null $watermarks_building
+ * @property int|null $watermarks_failed
  */
 #[Fillable([
     'title', 'episode_number', 'excerpt', 'body', 'access', 'status', 'published_at',
@@ -56,6 +60,12 @@ class Post extends Model
         return $this->belongsToMany(Tag::class);
     }
 
+    /** @return HasMany<PersonalizedFile, $this> */
+    public function personalizedFiles(): HasMany
+    {
+        return $this->hasMany(PersonalizedFile::class);
+    }
+
     /** @return BelongsTo<User, $this> */
     public function creator(): BelongsTo
     {
@@ -86,6 +96,31 @@ class Post extends Model
             ->map(fn (string $name) => Tag::firstOrCreate(['name' => $name])->id);
 
         $this->tags()->sync($ids);
+    }
+
+    /**
+     * Posts already live or going live within $hours; recently published ones stay in range for a day
+     * so late subscribers still get a copy built ahead of time.
+     *
+     * @param  Builder<Post>  $query
+     */
+    public function scopeVisibleSoon(Builder $query, int $hours): void
+    {
+        $query->where('status', PostStatus::Published)
+            ->where('published_at', '<=', now()->addHours($hours))
+            ->where('published_at', '>=', now()->subDay());
+    }
+
+    /**
+     * Adds watermarks_ready / watermarks_building / watermarks_failed counts (shown in the admin list).
+     *
+     * @param  Builder<Post>  $query
+     */
+    public function scopeWithWatermarkCounts(Builder $query): void
+    {
+        foreach (['ready', 'building', 'failed'] as $status) {
+            $query->withCount(["personalizedFiles as watermarks_{$status}" => fn ($q) => $q->where('status', $status)]);
+        }
     }
 
     public function isVisible(): bool

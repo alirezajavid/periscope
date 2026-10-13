@@ -23,7 +23,7 @@ class PostController extends Controller
 {
     public function index(Request $request): AnonymousResourceCollection
     {
-        $posts = Post::with('tags')
+        $posts = Post::with('tags')->withWatermarkCounts()
             ->when($request->boolean('trashed'), fn ($q) => $q->onlyTrashed())
             ->when($request->string('q')->trim()->value(), fn ($q, $term) => $q->where('title', 'like', '%'.addcslashes($term, '%_\\').'%'))
             ->when($request->enum('status', PostStatus::class), fn ($q, $status) => $q->where('status', $status))
@@ -36,7 +36,7 @@ class PostController extends Controller
 
     public function show(int $id): AdminPostResource
     {
-        return new AdminPostResource(Post::withTrashed()->with('tags')->findOrFail($id));
+        return new AdminPostResource(Post::withTrashed()->with('tags')->withWatermarkCounts()->findOrFail($id));
     }
 
     public function store(StorePostRequest $request): JsonResponse

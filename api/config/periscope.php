@@ -14,6 +14,9 @@ return [
     // Disk that receives the one-way copy for the foreign mirror (config/filesystems.php).
     'foreign_disk' => env('FOREIGN_DISK', 'foreign'),
 
+    // Public base URL of the foreign mirror (a reverse proxy to this app); empty = no mirror URLs.
+    'foreign_url' => env('PERISCOPE_FOREIGN_URL'),
+
     // Signed URL lifetime for personalized audio, in minutes.
     'audio_url_ttl' => (int) env('PERISCOPE_AUDIO_URL_TTL', 120),
 

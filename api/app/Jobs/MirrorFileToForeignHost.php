@@ -2,6 +2,7 @@
 
 namespace App\Jobs;
 
+use App\Models\PersonalizedFile;
 use App\Models\Post;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
@@ -17,7 +18,12 @@ class MirrorFileToForeignHost implements ShouldQueue
     /** @var array<int, int> */
     public array $backoff = [60, 300, 900, 3600];
 
-    public function __construct(public string $disk, public string $path, public ?int $postId = null) {}
+    public function __construct(
+        public string $disk,
+        public string $path,
+        public ?int $postId = null,
+        public ?int $personalizedFileId = null,
+    ) {}
 
     public function handle(): void
     {
@@ -31,5 +37,6 @@ class MirrorFileToForeignHost implements ShouldQueue
         Storage::disk(config('periscope.foreign_disk'))->writeStream($this->path, $source->readStream($this->path));
 
         Post::where('id', $this->postId)->where('audio_path', $this->path)->update(['audio_mirrored_at' => now()]);
+        PersonalizedFile::where('id', $this->personalizedFileId)->where('path', $this->path)->update(['mirrored_at' => now()]);
     }
 }

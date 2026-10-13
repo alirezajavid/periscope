@@ -28,6 +28,18 @@ class User extends Authenticatable implements MustVerifyEmail
     /** @use HasFactory<UserFactory> */
     use HasApiTokens, HasFactory, Notifiable, TwoFactorAuthenticatable;
 
+    /**
+     * Same as the column defaults, so a freshly created model is complete without a reload.
+     *
+     * @var array<string, mixed>
+     */
+    protected $attributes = [
+        'role' => 'user',
+        'status' => 'active',
+        'preferred_mirror' => 'ir',
+        'notify_new_episode' => true,
+    ];
+
     protected static function booted(): void
     {
         // 128-bit identifier embedded in this user's audio watermark.
@@ -66,6 +78,12 @@ class User extends Authenticatable implements MustVerifyEmail
     public function subscriptions(): HasMany
     {
         return $this->hasMany(Subscription::class);
+    }
+
+    /** @return HasMany<PersonalizedFile, $this> */
+    public function personalizedFiles(): HasMany
+    {
+        return $this->hasMany(PersonalizedFile::class);
     }
 
     /** @return HasMany<Payment, $this> */
