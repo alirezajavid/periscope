@@ -8,6 +8,7 @@ use App\Http\Controllers\Admin\Auth\TwoFactorChallengeController;
 use App\Http\Controllers\Admin\Auth\TwoFactorConfirmController;
 use App\Http\Controllers\Admin\Auth\TwoFactorSetupController;
 use App\Http\Controllers\Admin\LeakCheckController;
+use App\Http\Controllers\Admin\ListeningStatsController;
 use App\Http\Controllers\Admin\PaymentController;
 use App\Http\Controllers\Admin\PaymentMethodController;
 use App\Http\Controllers\Admin\PlanController;
@@ -46,6 +47,7 @@ Route::middleware(['auth:sanctum', 'admin.idle', 'admin'])->group(function () {
     Route::get('/posts/{post}/watermarks', [WatermarkController::class, 'index']);
     Route::post('/posts/{post}/watermarks/retry', [WatermarkController::class, 'retry']);
 
+    Route::get('/stats/listening', ListeningStatsController::class);
     Route::get('/leak-checks', [LeakCheckController::class, 'index']);
     Route::post('/leak-checks/text', [LeakCheckController::class, 'text'])->middleware('throttle:30,1');
     Route::post('/leak-checks/audio', [LeakCheckController::class, 'audio'])->middleware('throttle:10,1');
