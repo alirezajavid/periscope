@@ -1,7 +1,10 @@
 <?php
 
+use App\Http\Middleware\AdminIdleTimeout;
+use App\Http\Middleware\EnsureAdminTwoFactor;
 use App\Http\Middleware\EnsureSameDeviceFamily;
 use App\Http\Middleware\EnsureUserIsActive;
+use App\Http\Middleware\UseAdminSession;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -21,10 +24,13 @@ return Application::configure(basePath: dirname(__DIR__))
         },
     )
     ->withMiddleware(function (Middleware $middleware): void {
+        $middleware->prepend(UseAdminSession::class);
         $middleware->statefulApi();
 
         $middleware->alias([
             'active' => EnsureUserIsActive::class,
+            'admin' => EnsureAdminTwoFactor::class,
+            'admin.idle' => AdminIdleTimeout::class,
             'device' => EnsureSameDeviceFamily::class,
         ]);
     })

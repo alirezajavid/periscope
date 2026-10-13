@@ -13,6 +13,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Laravel\Fortify\TwoFactorAuthenticatable;
 use Laravel\Sanctum\HasApiTokens;
 
 /**
@@ -21,11 +22,11 @@ use Laravel\Sanctum\HasApiTokens;
  * @property MirrorServer $preferred_mirror
  */
 #[Fillable(['name', 'email', 'phone', 'password', 'notify_new_episode', 'preferred_mirror'])]
-#[Hidden(['password', 'remember_token', 'watermark_payload'])]
+#[Hidden(['password', 'remember_token', 'watermark_payload', 'two_factor_secret', 'two_factor_recovery_codes'])]
 class User extends Authenticatable implements MustVerifyEmail
 {
     /** @use HasFactory<UserFactory> */
-    use HasApiTokens, HasFactory, Notifiable;
+    use HasApiTokens, HasFactory, Notifiable, TwoFactorAuthenticatable;
 
     protected static function booted(): void
     {
@@ -46,6 +47,7 @@ class User extends Authenticatable implements MustVerifyEmail
             'email_verified_at' => 'datetime',
             'phone_verified_at' => 'datetime',
             'last_login_at' => 'datetime',
+            'two_factor_confirmed_at' => 'datetime',
             'password' => 'hashed',
             'notify_new_episode' => 'boolean',
             'role' => UserRole::class,
@@ -58,6 +60,11 @@ class User extends Authenticatable implements MustVerifyEmail
     public function sessions(): HasMany
     {
         return $this->hasMany(UserSession::class);
+    }
+
+    public function isAdmin(): bool
+    {
+        return $this->role === UserRole::Admin;
     }
 
     public function isBlocked(): bool
