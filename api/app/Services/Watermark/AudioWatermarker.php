@@ -18,6 +18,12 @@ class AudioWatermarker
     /** Write a watermarked MP3 of $original to $output. */
     public function apply(string $original, string $payload, string $output): void
     {
+        if (! config('periscope.watermark.enabled')) {
+            $this->encodeWithoutWatermark($original, $output);
+
+            return;
+        }
+
         $workDir = dirname($output).'/work-'.bin2hex(random_bytes(4));
         File::ensureDirectoryExists($workDir);
 
@@ -31,6 +37,16 @@ class AudioWatermarker
         } finally {
             File::deleteDirectory($workDir);
         }
+    }
+
+    /** Development only: same MP3 encoding, no mark. Never allowed in production. */
+    private function encodeWithoutWatermark(string $original, string $output): void
+    {
+        if (app()->isProduction()) {
+            throw new RuntimeException('Audio watermarking cannot be disabled in production.');
+        }
+
+        $this->run(['ffmpeg', '-y', '-i', $original, '-ac', '1', '-b:a', '64k', $output]);
     }
 
     /** Read the 128-bit payload from a leaked recording; null when no watermark is found. */
