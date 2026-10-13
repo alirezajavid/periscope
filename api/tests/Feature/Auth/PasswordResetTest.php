@@ -44,11 +44,11 @@ it('resets the password and signs the user out everywhere', function () {
     $this->postJson('/api/reset-password', [
         'token' => $token,
         'email' => $user->email,
-        'password' => 'brand-new-pass-1',
-        'password_confirmation' => 'brand-new-pass-1',
+        'password' => 'Brand-new-pass-1',
+        'password_confirmation' => 'Brand-new-pass-1',
     ])->assertOk();
 
-    expect(Hash::check('brand-new-pass-1', $user->fresh()->password))->toBeTrue()
+    expect(Hash::check('Brand-new-pass-1', $user->fresh()->password))->toBeTrue()
         ->and($user->sessions()->count())->toBe(0);
 });
 
@@ -58,7 +58,7 @@ it('rejects an invalid reset token', function () {
     $this->postJson('/api/reset-password', [
         'token' => 'bad-token',
         'email' => $user->email,
-        'password' => 'brand-new-pass-1',
-        'password_confirmation' => 'brand-new-pass-1',
+        'password' => 'Brand-new-pass-1',
+        'password_confirmation' => 'Brand-new-pass-1',
     ])->assertUnprocessable();
 });

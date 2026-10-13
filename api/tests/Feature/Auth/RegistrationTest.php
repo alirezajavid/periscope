@@ -12,8 +12,8 @@ it('registers a user, signs them in and sends the verification email', function 
     $this->postJson('/api/register', [
         'name' => 'Sara',
         'email' => 'sara@example.com',
-        'password' => 'secret-pass-1',
-        'password_confirmation' => 'secret-pass-1',
+        'password' => 'Secret-pass-1',
+        'password_confirmation' => 'Secret-pass-1',
     ])->assertCreated()
         ->assertJsonPath('data.email', 'sara@example.com')
         ->assertJsonPath('data.email_verified', false)
@@ -36,3 +36,14 @@ it('rejects a duplicate email and a weak password', function () {
         'password_confirmation' => 'short',
     ])->assertUnprocessable()->assertJsonValidationErrors(['email', 'password']);
 });
+
+it('enforces the password rules shown on the signup screen', function (string $password) {
+    $this->postJson('/api/register', [
+        'name' => 'Sara', 'email' => 'sara@example.com', 'password' => $password, 'password_confirmation' => $password,
+    ])->assertUnprocessable()->assertJsonValidationErrors('password');
+})->with([
+    'too short' => ['Ab1'],
+    'no digit' => ['Abcdefgh'],
+    'no uppercase' => ['abcdefg1'],
+    'no lowercase' => ['ABCDEFG1'],
+]);

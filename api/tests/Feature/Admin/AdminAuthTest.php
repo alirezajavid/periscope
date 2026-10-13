@@ -27,9 +27,9 @@ function totp(): string
 }
 
 it('uses its own session cookie for admin routes', function () {
-    $admin = User::factory()->admin()->create(['password' => 'secret-pass-1']);
+    $admin = User::factory()->admin()->create(['password' => 'Secret-pass-1']);
 
-    $response = $this->postJson('/api/admin/login', ['email' => $admin->email, 'password' => 'secret-pass-1']);
+    $response = $this->postJson('/api/admin/login', ['email' => $admin->email, 'password' => 'Secret-pass-1']);
 
     $sessionCookies = collect($response->headers->getCookies())
         ->map->getName()->filter(fn (string $name) => str_ends_with($name, '_session'))->values();
@@ -38,11 +38,11 @@ it('uses its own session cookie for admin routes', function () {
 });
 
 it('gives the same answer for unknown users, non-admins and wrong passwords', function () {
-    $subscriber = User::factory()->create(['password' => 'secret-pass-1']);
-    $admin = User::factory()->admin()->create(['password' => 'secret-pass-1']);
+    $subscriber = User::factory()->create(['password' => 'Secret-pass-1']);
+    $admin = User::factory()->admin()->create(['password' => 'Secret-pass-1']);
 
     $unknown = $this->postJson('/api/admin/login', ['email' => 'nobody@example.com', 'password' => 'x']);
-    $notAdmin = $this->postJson('/api/admin/login', ['email' => $subscriber->email, 'password' => 'secret-pass-1']);
+    $notAdmin = $this->postJson('/api/admin/login', ['email' => $subscriber->email, 'password' => 'Secret-pass-1']);
     $wrong = $this->postJson('/api/admin/login', ['email' => $admin->email, 'password' => 'wrong']);
 
     foreach ([$unknown, $notAdmin, $wrong] as $response) {
@@ -53,9 +53,9 @@ it('gives the same answer for unknown users, non-admins and wrong passwords', fu
 });
 
 it('walks a new admin through TOTP setup and logs them in only after the first code', function () {
-    $admin = User::factory()->admin()->create(['password' => 'secret-pass-1']);
+    $admin = User::factory()->admin()->create(['password' => 'Secret-pass-1']);
 
-    keepSession($this, $this->postJson('/api/admin/login', ['email' => $admin->email, 'password' => 'secret-pass-1']))
+    keepSession($this, $this->postJson('/api/admin/login', ['email' => $admin->email, 'password' => 'Secret-pass-1']))
         ->assertOk()->assertJsonPath('status', 'two_factor_setup_required');
 
     $this->getJson('/api/admin/user')->assertUnauthorized(); // password alone is not a login
@@ -79,9 +79,9 @@ it('walks a new admin through TOTP setup and logs them in only after the first c
 });
 
 it('asks an admin with TOTP for a code and rejects a wrong one', function () {
-    $admin = User::factory()->admin()->withTwoFactor()->create(['password' => 'secret-pass-1']);
+    $admin = User::factory()->admin()->withTwoFactor()->create(['password' => 'Secret-pass-1']);
 
-    keepSession($this, $this->postJson('/api/admin/login', ['email' => $admin->email, 'password' => 'secret-pass-1']))
+    keepSession($this, $this->postJson('/api/admin/login', ['email' => $admin->email, 'password' => 'Secret-pass-1']))
         ->assertJsonPath('status', 'two_factor_required');
 
     $this->postJson('/api/admin/two-factor/challenge', ['code' => '000000'])
@@ -93,9 +93,9 @@ it('asks an admin with TOTP for a code and rejects a wrong one', function () {
 });
 
 it('accepts a recovery code once', function () {
-    $admin = User::factory()->admin()->withTwoFactor()->create(['password' => 'secret-pass-1']);
+    $admin = User::factory()->admin()->withTwoFactor()->create(['password' => 'Secret-pass-1']);
 
-    keepSession($this, $this->postJson('/api/admin/login', ['email' => $admin->email, 'password' => 'secret-pass-1']));
+    keepSession($this, $this->postJson('/api/admin/login', ['email' => $admin->email, 'password' => 'Secret-pass-1']));
     $this->postJson('/api/admin/two-factor/challenge', ['recovery_code' => 'recovery-one'])->assertOk();
 
     expect($admin->fresh()->recoveryCodes())->not->toContain('recovery-one')->toHaveCount(2);
@@ -122,8 +122,8 @@ it('refuses an admin whose TOTP step was not completed in this session', functio
 });
 
 it('signs the admin out after 30 idle minutes and keeps active sessions alive', function () {
-    $admin = User::factory()->admin()->withTwoFactor()->create(['password' => 'secret-pass-1']);
-    keepSession($this, $this->postJson('/api/admin/login', ['email' => $admin->email, 'password' => 'secret-pass-1']));
+    $admin = User::factory()->admin()->withTwoFactor()->create(['password' => 'Secret-pass-1']);
+    keepSession($this, $this->postJson('/api/admin/login', ['email' => $admin->email, 'password' => 'Secret-pass-1']));
     $this->postJson('/api/admin/two-factor/challenge', ['code' => totp()])->assertOk();
 
     $this->travel(29)->minutes();
@@ -146,9 +146,9 @@ it('logs out and records it', function () {
 });
 
 it('does not let a blocked admin start a login', function () {
-    $admin = User::factory()->admin()->blocked()->create(['password' => 'secret-pass-1']);
+    $admin = User::factory()->admin()->blocked()->create(['password' => 'Secret-pass-1']);
 
-    $this->postJson('/api/admin/login', ['email' => $admin->email, 'password' => 'secret-pass-1'])->assertForbidden();
+    $this->postJson('/api/admin/login', ['email' => $admin->email, 'password' => 'Secret-pass-1'])->assertForbidden();
 });
 
 it('hands out a CSRF token in the response body', function () {
