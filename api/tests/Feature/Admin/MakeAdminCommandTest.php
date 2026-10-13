@@ -13,11 +13,11 @@ it('promotes an existing user to admin', function () {
 
 it('creates a new verified admin', function () {
     $this->artisan('periscope:make-admin', [
-        'email' => 'boss@example.com', '--name' => 'Boss', '--password' => 'secret-pass-1',
+        'email' => 'boss@example.com', '--name' => 'Boss', '--password' => 'Secret-pass-1',
     ])->assertSuccessful();
 
     $admin = User::firstWhere('email', 'boss@example.com');
     expect($admin->role)->toBe(UserRole::Admin)
         ->and($admin->hasVerifiedEmail())->toBeTrue()
-        ->and(Hash::check('secret-pass-1', $admin->password))->toBeTrue();
+        ->and(Hash::check('Secret-pass-1', $admin->password))->toBeTrue();
 });

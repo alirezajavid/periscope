@@ -129,9 +129,9 @@ it('lets the new subscriber choose a password with the emailed link', function (
     expect($mail->actionUrl)->toContain('/#/reset-password?token=')->toContain('welcome=1');
 
     $this->postJson('/api/reset-password', [
-        'token' => $query['token'], 'email' => 'sara@example.com', 'password' => 'my-new-pass-1', 'password_confirmation' => 'my-new-pass-1',
+        'token' => $query['token'], 'email' => 'sara@example.com', 'password' => 'My-new-pass-1', 'password_confirmation' => 'My-new-pass-1',
     ])->assertOk();
-    $this->postJson('/api/login', ['email' => 'sara@example.com', 'password' => 'my-new-pass-1'])->assertOk();
+    $this->postJson('/api/login', ['email' => 'sara@example.com', 'password' => 'My-new-pass-1'])->assertOk();
 });
 
 it('can resend the set-password link', function () {

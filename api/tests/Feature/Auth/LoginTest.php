@@ -10,9 +10,9 @@ beforeEach(function () {
 });
 
 it('logs in with email and password and records the session and event', function () {
-    $user = User::factory()->create(['password' => 'secret-pass-1']);
+    $user = User::factory()->create(['password' => 'Secret-pass-1']);
 
-    $this->postJson('/api/login', ['email' => $user->email, 'password' => 'secret-pass-1'])
+    $this->postJson('/api/login', ['email' => $user->email, 'password' => 'Secret-pass-1'])
         ->assertOk()
         ->assertJsonPath('data.id', $user->id);
 
@@ -22,7 +22,7 @@ it('logs in with email and password and records the session and event', function
 });
 
 it('rejects wrong credentials and records the failed attempt', function () {
-    $user = User::factory()->create(['password' => 'secret-pass-1']);
+    $user = User::factory()->create(['password' => 'Secret-pass-1']);
 
     $this->postJson('/api/login', ['email' => $user->email, 'password' => 'wrong'])
         ->assertUnprocessable()
@@ -33,9 +33,9 @@ it('rejects wrong credentials and records the failed attempt', function () {
 });
 
 it('does not let a blocked user in', function () {
-    $user = User::factory()->blocked()->create(['password' => 'secret-pass-1']);
+    $user = User::factory()->blocked()->create(['password' => 'Secret-pass-1']);
 
-    $this->postJson('/api/login', ['email' => $user->email, 'password' => 'secret-pass-1'])
+    $this->postJson('/api/login', ['email' => $user->email, 'password' => 'Secret-pass-1'])
         ->assertForbidden();
 
     expect($user->sessions()->count())->toBe(0);

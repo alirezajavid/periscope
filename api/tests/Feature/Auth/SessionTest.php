@@ -82,7 +82,7 @@ it('logs out of every device', function () {
 });
 
 it('signs out of all devices after a password change', function () {
-    $user = User::factory()->create(['password' => 'old-secret-1']);
+    $user = User::factory()->create(['password' => 'Old-secret-1']);
     UserSession::create([
         'user_id' => $user->id, 'session_id' => 'other-device', 'browser_family' => 'Safari',
         'os_family' => 'iOS', 'last_activity_at' => now(),
@@ -92,25 +92,25 @@ it('signs out of all devices after a password change', function () {
         ->withSession(['device' => $this->device])
         ->withHeader('User-Agent', CHROME_WINDOWS)
         ->putJson('/api/password', [
-            'current_password' => 'old-secret-1',
-            'password' => 'new-secret-2',
-            'password_confirmation' => 'new-secret-2',
+            'current_password' => 'Old-secret-1',
+            'password' => 'New-secret-2',
+            'password_confirmation' => 'New-secret-2',
         ])->assertOk();
 
     expect($user->sessions()->count())->toBe(0)
-        ->and(Hash::check('new-secret-2', $user->fresh()->password))->toBeTrue();
+        ->and(Hash::check('New-secret-2', $user->fresh()->password))->toBeTrue();
 });
 
 it('refuses a password change with the wrong current password', function () {
-    $user = User::factory()->create(['password' => 'old-secret-1']);
+    $user = User::factory()->create(['password' => 'Old-secret-1']);
 
     $this->actingAs($user)
         ->withSession(['device' => $this->device])
         ->withHeader('User-Agent', CHROME_WINDOWS)
         ->putJson('/api/password', [
             'current_password' => 'nope',
-            'password' => 'new-secret-2',
-            'password_confirmation' => 'new-secret-2',
+            'password' => 'New-secret-2',
+            'password_confirmation' => 'New-secret-2',
         ])->assertUnprocessable()->assertJsonValidationErrors('current_password');
 });
 
