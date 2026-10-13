@@ -1,6 +1,13 @@
 import { computed, ref } from 'vue'
 import { defineStore } from 'pinia'
 import { api } from '@/boot/axios'
+import {
+  cancelScheduledCache,
+  offlineBlocker,
+  offlineSource,
+  requestPersistentStorage,
+  scheduleCache,
+} from '@/services/offlineAudio'
 
 const SKIP_SECONDS = 15
 const REPORT_EVERY_MS = 15000
@@ -32,7 +39,8 @@ export const usePlayerStore = defineStore('player', () => {
   const duration = ref(0)
   const speed = ref(1)
   const sleepEndsAt = ref(null)
-  const source = ref('') // url currently loaded (used by the offline cache)
+  const source = ref('') // url currently loaded
+  const offline = ref(false) // playing a stored copy because the network is unavailable
 
   const isPlaying = computed(() => status.value === 'playing')
   const hasTrack = computed(() => current.value !== null)
@@ -41,7 +49,15 @@ export const usePlayerStore = defineStore('player', () => {
     if (audio) return audio
     audio = new Audio()
     audio.preload = 'auto'
-    audio.addEventListener('timeupdate', () => (position.value = audio.currentTime))
+    audio.addEventListener('timeupdate', () => {
+      position.value = audio.currentTime
+      if (current.value && Math.floor(audio.currentTime) % 5 === 0) {
+        localStorage.setItem(
+          `periscope.position.${current.value.id}`,
+          String(Math.floor(audio.currentTime)),
+        )
+      }
+    })
     audio.addEventListener('loadedmetadata', () => {
       if (Number.isFinite(audio.duration)) duration.value = Math.floor(audio.duration)
     })
@@ -74,10 +90,16 @@ export const usePlayerStore = defineStore('player', () => {
   /** Ask the API where to stream from; waits while the personalized copy is being built. */
   async function resolveSource(postId) {
     for (let attempt = 0; attempt < PREPARING_MAX_TRIES; attempt++) {
-      const response = await api.get(`/api/posts/${postId}/audio`, {
-        params: { device: deviceId() },
-        validateStatus: (code) => code < 500,
-      })
+      let response
+      try {
+        response = await api.get(`/api/posts/${postId}/audio`, {
+          params: { device: deviceId() },
+          validateStatus: (code) => code < 500,
+        })
+      } catch (e) {
+        if (e.response) throw e
+        return storedCopy(postId) // no network at all
+      }
       if (response.status === 200) return response.data.url
       if (response.status === 202) {
         status.value = 'preparing'
@@ -93,7 +115,18 @@ export const usePlayerStore = defineStore('player', () => {
     throw Object.assign(new Error('unavailable'), { code: 'unavailable' })
   }
 
+  /** No connection: play the copy stored by the Service Worker, if the offline rules allow it. */
+  function storedCopy(postId) {
+    const blocker = offlineBlocker()
+    if (blocker) throw Object.assign(new Error(blocker), { code: blocker })
+    const url = offlineSource(postId, import.meta.env.API_URL)
+    if (!url) throw Object.assign(new Error('offline_unavailable'), { code: 'offline_unavailable' })
+    offline.value = true
+    return url
+  }
+
   async function resumePosition(postId) {
+    if (offline.value) return Number(localStorage.getItem(`periscope.position.${postId}`) || 0)
     try {
       const { data } = await api.get(`/api/posts/${postId}/progress`)
       return data.completed ? 0 : data.position
@@ -118,6 +151,8 @@ export const usePlayerStore = defineStore('player', () => {
       access: post.access,
     }
     error.value = ''
+    offline.value = false
+    cancelScheduledCache()
     status.value = 'loading'
     position.value = 0
     duration.value = post.audio_duration || 0
@@ -133,6 +168,10 @@ export const usePlayerStore = defineStore('player', () => {
       position.value = start
       await el.play()
       setupMediaSession()
+      if (!offline.value) {
+        requestPersistentStorage()
+        scheduleCache(post, url, () => current.value?.id === post.id && !audio.paused)
+      }
     } catch (e) {
       if (e.name === 'NotAllowedError')
         status.value = 'paused' // the browser wants a tap first
@@ -176,7 +215,7 @@ export const usePlayerStore = defineStore('player', () => {
 
   /** Report the position; the same call keeps the one-device lock alive. */
   async function report() {
-    if (!current.value || !audio?.src) return
+    if (!current.value || !audio?.src || offline.value) return
     try {
       await api.put(`/api/posts/${current.value.id}/progress`, {
         position: Math.floor(audio.currentTime || 0),
@@ -218,6 +257,8 @@ export const usePlayerStore = defineStore('player', () => {
     position.value = 0
     duration.value = 0
     source.value = ''
+    offline.value = false
+    cancelScheduledCache()
     if ('mediaSession' in navigator) navigator.mediaSession.metadata = null
   }
 
@@ -251,6 +292,7 @@ export const usePlayerStore = defineStore('player', () => {
     speed,
     sleepEndsAt,
     source,
+    offline,
     isPlaying,
     hasTrack,
     play,

@@ -1,6 +1,7 @@
 import { ref, computed } from 'vue'
 import { defineStore, acceptHMRUpdate } from 'pinia'
 import { api } from '@/boot/axios'
+import { OFFLINE_GRACE_MS, clearOfflineAudio } from '@/services/offlineAudio'
 import { usePlayerStore } from '@/stores/usePlayerStore'
 import { useSubscriptionStore } from '@/stores/useSubscriptionStore'
 
@@ -11,12 +12,30 @@ export const useAuthStore = defineStore('auth', () => {
   const isLoggedIn = computed(() => user.value !== null)
   const emailVerified = computed(() => user.value?.email_verified === true)
 
+  const USER_KEY = 'periscope.user'
+
+  function remember(value) {
+    user.value = value
+    localStorage.setItem(USER_KEY, JSON.stringify(value))
+  }
+
+  // No connection at all: keep the last known user for the offline grace period so stored episodes stay reachable.
+  function rememberedUser() {
+    const lastCheck = Number(localStorage.getItem('periscope.lastOnlineCheck') || 0)
+    if (!lastCheck || Date.now() - lastCheck > OFFLINE_GRACE_MS) return null
+    try {
+      return JSON.parse(localStorage.getItem(USER_KEY))
+    } catch {
+      return null
+    }
+  }
+
   async function fetchUser() {
     try {
       const { data } = await api.get('/api/user')
-      user.value = data.data
-    } catch {
-      user.value = null
+      remember(data.data)
+    } catch (e) {
+      user.value = e.response ? null : rememberedUser()
     } finally {
       loaded.value = true
     }
@@ -24,7 +43,7 @@ export const useAuthStore = defineStore('auth', () => {
 
   async function submitAndStore(request) {
     const { data } = await request
-    user.value = data.data
+    remember(data.data)
   }
 
   const register = (payload) => submitAndStore(api.post('/api/register', payload))
@@ -41,7 +60,9 @@ export const useAuthStore = defineStore('auth', () => {
   // Whenever the session ends: stop playing and forget per-user state (offline audio is cleared in usePlayerStore.stop)
   function clearSession() {
     usePlayerStore().stop()
+    clearOfflineAudio()
     useSubscriptionStore().reset()
+    localStorage.removeItem(USER_KEY)
     user.value = null
   }
 

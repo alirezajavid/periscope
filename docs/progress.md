@@ -30,7 +30,10 @@ Read this file and `CLAUDE.md` first in every new session.
 - feat/seeders: `php artisan db:seed` (local only) + `docs/api.md`, dev switch `WATERMARK_ENABLED=false` (refused in production). Merged, together with feat/password-rules (server enforces the 3 rules the signup screen shows).
 
 ## In progress
-- feat/app-content-player: main layout + tab bar + mini player, home, episode, search, full player (preparing state, speed, sleep timer, ±15 s, Media Session, progress + one-device lock), ask, account, plans, payment, payment history, support, change password, maintenance page.
+- feat/app-offline-cache: custom Service Worker (InjectManifest) storing the whole personalized file ~30 s after play starts (Cache Storage, key without the signed query, Range via `workbox-range-requests`), offline rules (7 days since last online check, subscription not ended), stored episodes listed on Home when the API is unreachable, cache cleared on logout / when the subscription ends, `navigator.storage.persist()`.
+
+## Done (app)
+- feat/app-content-player (merged): main layout + tab bar + mini player, home, episode, search, full player (preparing state, speed, sleep timer, ±15 s, Media Session, progress + one-device lock), ask, account, plans, payment, payment history, support, change password, maintenance page.
 
 ## Done (app)
 - feat/app-foundation-auth (merged): app styles/components/layouts + all auth screens (login, register, verify email, forgot/reset password, phone OTP, Google), small API additions (`PUT /api/email`, question limit 500, per-route throttle prefixes).
@@ -70,6 +73,10 @@ API is complete (see `docs/api.md`). Left: app screens (home, episode, search, a
 - Visual checks: Playwright (`playwright-core` in `/tmp/pw`, outside the repo) driving the installed Chrome at 390 px, compared with `docs/design/`.
 - UI differences from the prototype (deliberate): header back arrow sits at the reading start (right) next to the title; "edit email" opens an inline form (needs `PUT /api/email`); the prototype's "simulation: click the email link" boxes are not built; the password rule is "upper- and lower-case Latin letters" (what the API enforces) instead of "an upper-case letter".
 - Quasar here has no `build.rtl`; RTL is `direction: rtl` in CSS (see `docs/frontend.md`). The IRANSans font file is not in the repo: Tahoma is the fallback until it is added.
+
+- Package note: `workbox-range-requests` was added to `app/src-pwa/package.json` (it was already installed as a Workbox dependency). reference.md §5 names Workbox + RangeRequestsPlugin explicitly; the SW uses its `createPartialResponse` directly because the cache lookup ignores the signed query string.
+- The app remembers the last signed-in user in localStorage (`periscope.user`) only to keep stored episodes reachable offline within the 7-day grace period; it is removed on logout.
+- To test the SW the app must be built (`API_URL=http://localhost:8001 npx quasar build -m pwa`) and served as static files on port 9000 (the API only allows the dev origins); `python3 -m http.server 9000 -d dist/pwa` is enough (hash routing).
 
 ## Problems
 - Found by browser testing: `throttle:N,M` without a prefix shares one counter between every route (progress/heartbeat calls ate the payment and login quota). Every throttled route now has its own prefix (test added).

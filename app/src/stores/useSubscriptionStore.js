@@ -1,6 +1,7 @@
 import { computed, ref } from 'vue'
 import { defineStore } from 'pinia'
 import { api } from '@/boot/axios'
+import { clearOfflineAudio } from '@/services/offlineAudio'
 
 /** The signed-in user's subscription state, plans, payment methods and payments. */
 export const useSubscriptionStore = defineStore('subscription', () => {
@@ -18,6 +19,8 @@ export const useSubscriptionStore = defineStore('subscription', () => {
     // Remember when we last confirmed the subscription online: offline playback relies on it.
     localStorage.setItem('periscope.lastOnlineCheck', String(Date.now()))
     localStorage.setItem('periscope.subscriptionEndsAt', data.ends_at ?? '')
+    // The subscription is over: stored episodes must not stay playable offline.
+    if (!data.active) clearOfflineAudio()
     return data
   }
 
