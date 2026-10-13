@@ -19,7 +19,10 @@ use App\Http\Controllers\Api\FreeAudioController;
 use App\Http\Controllers\Api\PaymentController;
 use App\Http\Controllers\Api\PaymentMethodController;
 use App\Http\Controllers\Api\PlanController;
+use App\Http\Controllers\Api\PlaybackLockController;
+use App\Http\Controllers\Api\PostAudioController;
 use App\Http\Controllers\Api\PostController;
+use App\Http\Controllers\Api\StreamAudioController;
 use App\Http\Controllers\Api\SubscriptionController;
 use App\Http\Controllers\Api\TagController;
 use Illuminate\Support\Facades\Route;
@@ -38,11 +41,13 @@ Route::get('/plans', [PlanController::class, 'index']);
 Route::get('/tags', [TagController::class, 'index']);
 Route::get('/feed/free.xml', FeedController::class);
 Route::get('/posts/{id}/free-audio', FreeAudioController::class);
+Route::get('/audio/{file}', StreamAudioController::class)->middleware('signed:relative')->name('audio.stream');
 
 // Open to everyone; what a post contains depends on who is asking (see PostPolicy).
 Route::middleware(['active', 'device'])->group(function () {
     Route::get('/posts', [PostController::class, 'index']);
     Route::get('/posts/{id}', [PostController::class, 'show']);
+    Route::get('/posts/{id}/audio', PostAudioController::class);
 });
 
 Route::middleware(['auth:sanctum', 'active', 'device'])->group(function () {
@@ -50,6 +55,8 @@ Route::middleware(['auth:sanctum', 'active', 'device'])->group(function () {
     Route::get('/payments', [PaymentController::class, 'index']);
     Route::post('/payments', [PaymentController::class, 'store'])->middleware('throttle:10,1');
     Route::get('/subscription', SubscriptionController::class);
+    Route::post('/playback/heartbeat', [PlaybackLockController::class, 'heartbeat']);
+    Route::post('/playback/release', [PlaybackLockController::class, 'release']);
 
     Route::get('/user', MeController::class);
     Route::post('/logout', LogoutController::class);

@@ -13,6 +13,7 @@ use App\Http\Controllers\Admin\PlanController;
 use App\Http\Controllers\Admin\PostController;
 use App\Http\Controllers\Admin\TagController;
 use App\Http\Controllers\Admin\UserSubscriptionController;
+use App\Http\Controllers\Admin\WatermarkController;
 use Illuminate\Support\Facades\Route;
 
 // Registered in bootstrap/app.php under the /api/admin prefix; uses its own session cookie.
@@ -41,6 +42,8 @@ Route::middleware(['auth:sanctum', 'admin.idle', 'admin'])->group(function () {
     Route::post('/posts/{id}/restore', [PostController::class, 'restore']);
     Route::post('/posts/{post}/cover', [PostController::class, 'cover']);
     Route::post('/posts/{post}/audio', [PostController::class, 'audio']);
+    Route::get('/posts/{post}/watermarks', [WatermarkController::class, 'index']);
+    Route::post('/posts/{post}/watermarks/retry', [WatermarkController::class, 'retry']);
 
     Route::post('/users/{user}/subscriptions', [UserSubscriptionController::class, 'store']);
 });
