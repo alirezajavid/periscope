@@ -48,7 +48,7 @@ export default defineConfig((ctx) => {
         '@shared': fileURLToPath(new URL('../shared', import.meta.url)),
       },
 
-      env: {
+      defineEnv: {
         API_URL: process.env.API_URL || 'http://localhost:8000',
       },
       // vueRouterBase,
@@ -102,6 +102,7 @@ export default defineConfig((ctx) => {
       // vueDevtools: true,
       // https: true,
       open: false,
+      port: 9001, // app/ uses 9000
       fs: { allow: ['..'] }, // lets Vite serve ../shared
     },
 

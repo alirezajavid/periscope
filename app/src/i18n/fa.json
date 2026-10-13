@@ -1,6 +1,37 @@
 {
+  "app": {
+    "name": "پریسکوپ"
+  },
   "common": {
     "failed": "عملیات ناموفق بود",
     "success": "عملیات با موفقیت انجام شد"
+  },
+  "home": {
+    "welcome": "{name}، خوش آمدید"
+  },
+  "auth": {
+    "name": "نام",
+    "email": "ایمیل",
+    "password": "رمز عبور",
+    "newPassword": "رمز عبور جدید",
+    "passwordConfirmation": "تکرار رمز عبور",
+    "passwordHint": "حداقل ۸ نویسه",
+    "login": "ورود",
+    "logout": "خروج",
+    "register": "ثبت‌نام",
+    "createAccount": "ساخت حساب",
+    "haveAccount": "حساب دارید؟ وارد شوید",
+    "forgotPassword": "فراموشی رمز عبور",
+    "forgotPasswordIntro": "ایمیل خود را وارد کنید تا لینک بازنشانی رمز برایتان ارسال شود.",
+    "sendResetLink": "ارسال لینک بازنشانی",
+    "resetLinkSent": "اگر حسابی با این ایمیل وجود داشته باشد، لینک بازنشانی رمز عبور برایش ارسال شد.",
+    "resetPassword": "تغییر رمز عبور",
+    "passwordResetDone": "رمز عبور تغییر کرد. اکنون می‌توانید وارد شوید.",
+    "backToLogin": "بازگشت به ورود",
+    "sessionEnded": "نشست شما پایان یافته است. لطفاً دوباره وارد شوید.",
+    "verifyBanner": "ایمیل شما هنوز تأیید نشده است.",
+    "resendVerification": "ارسال دوباره‌ی ایمیل تأیید",
+    "emailVerified": "ایمیل شما تأیید شد.",
+    "continue": "ادامه"
   }
 }
