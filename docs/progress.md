@@ -29,17 +29,45 @@ Read this file and `CLAUDE.md` first in every new session.
 - feat/users-and-notifications merged.
 - feat/seeders: `php artisan db:seed` (local only) + `docs/api.md`, dev switch `WATERMARK_ENABLED=false` (refused in production). Merged, together with feat/password-rules (server enforces the 3 rules the signup screen shows).
 
+## Done (app)
+- feat/app-foundation-auth, feat/app-content-player, feat/app-offline-cache (all merged): styles/components/layouts, all auth screens, main layout with tab bar and mini player, home, episode, search, full player (preparing state, speed, sleep timer, ±15 s, Media Session, progress + one-device lock), ask, account, plans, payment, payment history, support, change password, maintenance page, and the silent offline audio cache (custom Service Worker, 30 s after play, 7-day grace, cleared on logout / subscription end, `navigator.storage.persist()`).
+
+## Done (admin)
+- feat/admin-foundation, feat/admin-users-payments, feat/admin-community-settings (all merged): login with TOTP setup/challenge, posts list and editor (cover, audio, watermark status), users and user detail, payment queue, question inbox, listening stats, leak check, settings (links, support items, fixed pages, plans, payment methods, maintenance).
+
 ## In progress
-- feat/app-offline-cache: custom Service Worker (InjectManifest) storing the whole personalized file ~30 s after play starts (Cache Storage, key without the signed query, Range via `workbox-range-requests`), offline rules (7 days since last online check, subscription not ended), stored episodes listed on Home when the API is unreachable, cache cleared on logout / when the subscription ends, `navigator.storage.persist()`.
+- Nothing.
 
-## Done (app)
-- feat/app-content-player (merged): main layout + tab bar + mini player, home, episode, search, full player (preparing state, speed, sleep timer, ±15 s, Media Session, progress + one-device lock), ask, account, plans, payment, payment history, support, change password, maintenance page.
+## Remaining (needs the owner or a real environment)
+- Real SMS provider (driver is `log`; OTP codes are in `api/storage/logs/laravel.log`).
+- IRANSans font file (Tahoma fallback until it is added to `app/` and `admin/`).
+- Real plan prices (seed prices are placeholders) and the payment texts from the owner.
+- Install `audiowmark` and run the real-episode test from reference.md §11 (time and audio quality); the audio leak check also needs it.
+- Copy a marked paragraph into Telegram and back to confirm the invisible marks survive.
+- Production: mail service, foreign mirror disk/URL, backups (`spatie/laravel-backup` is planned before the first real subscriber), HTTPS cookie domains, Supervisor for the queue and cron for the scheduler. Deployment is done by the owner (`deploy.sh`).
+- Test the PWA install and offline cache on a real phone (Android and iOS).
 
-## Done (app)
-- feat/app-foundation-auth (merged): app styles/components/layouts + all auth screens (login, register, verify email, forgot/reset password, phone OTP, Google), small API additions (`PUT /api/email`, question limit 500, per-route throttle prefixes).
+## How to run locally
+```bash
+# api (port 8001; WATERMARK_ENABLED=false because audiowmark is not installed here)
+cd api && php artisan migrate && php artisan db:seed
+WATERMARK_ENABLED=false php artisan serve --host=localhost --port=8001
+php artisan queue:work redis --queue=watermark-priority,watermark,default   # second terminal
+php artisan schedule:work                                                   # third terminal
+# user app (PWA)
+cd app && API_URL=http://localhost:8001 npx quasar dev -m pwa -p 9000
+# admin panel
+cd admin && API_URL=http://localhost:8001 npx quasar dev -p 9001
+```
+- Demo users (password `password`): `subscriber@periscope.test`, `free@periscope.test`, `expired@periscope.test`, `blocked@periscope.test`, and the admin `admin@periscope.test`.
+- Admin two-factor: the seeded admin's authenticator secret is `JBSWY3DPEHPK3PXP` (local seed only); add it to any authenticator app as a manual key. A new admin made with `php artisan periscope:make-admin <email> --name … --password …` sets up the authenticator on first login (QR + recovery codes shown once).
+- To test the offline cache the app must be built and served statically: `API_URL=http://localhost:8001 npx quasar build -m pwa` then `python3 -m http.server 9000 -d dist/pwa`.
 
-## Remaining
-API is complete (see `docs/api.md`). Left: app screens (home, episode, search, ask, account, plans, payment, player + offline cache SW, static pages, states), then the admin panel UI.
+## Differences from the prototype (deliberate)
+- Header back arrow sits at the reading start (right) next to the title (RTL).
+- "Edit email" opens an inline form; the prototype's "simulation: click the email link" boxes are not built.
+- Password rule is "upper- and lower-case Latin letters" (what the API enforces).
+- Admin panel is plain Quasar by design (no prototype styling), sidebar on the right.
 
 ## Decisions made without confirmation
 - Port 8001 for the local API because 8000 is occupied by another project.
@@ -87,3 +115,5 @@ API is complete (see `docs/api.md`). Left: app screens (home, episode, search, a
 - Admin sidebar: this Quasar version mirrors layout offsets for RTL but its stylesheet keeps `.q-drawer--left` on the physical left; `admin/src/css/app.scss` pins it to the right so the sidebar and the content offset agree.
 - Admin: users (list, create, detail with block/unblock, logout everywhere, resend set-password link, manual subscription) and the payment queue (receipt shown from a blob fetched with the admin session, approve with optional start date, reject with reason; both behind a confirm dialog that states the consequence) are done and checked in the browser at 1440 and 390 px.
 - Admin: question inbox (star, text answer and/or "answered in episode", confirm before answering), listening stats, leak check (text and audio, with history) and settings (links and support items, fixed pages with the limited editor, plans and prices per currency, payment methods, maintenance mode with a confirm dialog) are done and checked in the browser at 1440 and 390 px. Audio leak check was not run for real because `audiowmark` is not installed here.
+
+وضعیت: تمام شد
