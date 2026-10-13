@@ -28,6 +28,10 @@ return [
         'maintenance_message' => ['nullable', 'string', 'max:1000'],
     ],
 
+    // Audio watermark. Turning `enabled` off skips audiowmark (plain 64 kbps copy) so playback can be
+    // tried on a machine without it; it is refused in production, where a copy without a mark would be a leak.
+    'watermark' => ['enabled' => (bool) env('WATERMARK_ENABLED', true)],
+
     // Signed URL lifetime for personalized audio, in minutes.
     'audio_url_ttl' => (int) env('PERISCOPE_AUDIO_URL_TTL', 120),
 

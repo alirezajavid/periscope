@@ -26,9 +26,11 @@ Read this file and `CLAUDE.md` first in every new session.
 - feat/questions-settings: subscriber questions (+ admin star/answer with text and/or episode), key-value settings (links, about/terms/install pages sanitized, maintenance switch, support items with server-made QR SVG for crypto addresses, no extra package).
 - feat/questions-settings merged.
 - feat/users-and-notifications: admin user list/detail (watermark payload, subscriptions, payments, sessions, logins), block/unblock/logout-all, admin-created accounts (set-password link by email, resend), profile update, new-episode email (`periscope:notify-new-episodes`, every 5 min) with signed one-click unsubscribe.
+- feat/users-and-notifications merged.
+- feat/seeders: `php artisan db:seed` (local only) + `docs/api.md`, dev switch `WATERMARK_ENABLED=false` (refused in production).
 
 ## In progress
-- feat/users-and-notifications (merging)
+- feat/seeders (merging)
 
 ## Remaining
 Per the overnight plan: auth (OTP, Google), admin auth (TOTP), posts, payments/subscriptions, watermark, text fingerprint, remaining APIs, `docs/api.md`, app UI, admin UI.
