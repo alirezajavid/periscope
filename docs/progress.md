@@ -27,13 +27,13 @@ Read this file and `CLAUDE.md` first in every new session.
 - feat/questions-settings merged.
 - feat/users-and-notifications: admin user list/detail (watermark payload, subscriptions, payments, sessions, logins), block/unblock/logout-all, admin-created accounts (set-password link by email, resend), profile update, new-episode email (`periscope:notify-new-episodes`, every 5 min) with signed one-click unsubscribe.
 - feat/users-and-notifications merged.
-- feat/seeders: `php artisan db:seed` (local only) + `docs/api.md`, dev switch `WATERMARK_ENABLED=false` (refused in production).
+- feat/seeders: `php artisan db:seed` (local only) + `docs/api.md`, dev switch `WATERMARK_ENABLED=false` (refused in production). Merged, together with feat/password-rules (server enforces the 3 rules the signup screen shows).
 
 ## In progress
-- feat/seeders (merging)
+- feat/app-foundation-auth: app styles/components/layouts + all auth screens (login, register, verify email, forgot/reset password, phone OTP, Google), small API additions (`PUT /api/email`, question limit 500, per-route throttle prefixes).
 
 ## Remaining
-Per the overnight plan: auth (OTP, Google), admin auth (TOTP), posts, payments/subscriptions, watermark, text fingerprint, remaining APIs, `docs/api.md`, app UI, admin UI.
+API is complete (see `docs/api.md`). Left: app screens (home, episode, search, ask, account, plans, payment, player + offline cache SW, static pages, states), then the admin panel UI.
 
 ## Decisions made without confirmation
 - Port 8001 for the local API because 8000 is occupied by another project.
@@ -62,5 +62,12 @@ Per the overnight plan: auth (OTP, Google), admin auth (TOTP), posts, payments/s
 - Admin-created accounts (Telegram subscribers): no permanent password is ever set; the person gets a set-password link (valid 60 min like every reset link). The admin can resend it from the user page (`POST /api/admin/users/{id}/send-password-link`). This answers the open security question in reference.md §6.
 - New-episode emails go to active users with a verified email who did not opt out; only posts published within the last day are announced (so importing old episodes does not mail everyone).
 
+- Local run needs `WATERMARK_ENABLED=false` for the API process (no `audiowmark` here): `WATERMARK_ENABLED=false php artisan serve --host=localhost --port=8001`; app: `API_URL=http://localhost:8001 npx quasar dev -m pwa -p 9000`. Demo logins (after `php artisan db:seed`): `subscriber@periscope.test`, `free@periscope.test`, `expired@periscope.test`, `admin@periscope.test` — password `password`; the admin's authenticator secret is `JBSWY3DPEHPK3PXP` (local seed only).
+- OTP codes are written to `api/storage/logs/laravel.log` (`SMS_DRIVER=log`); emails too (`MAIL_MAILER=log`).
+- Visual checks: Playwright (`playwright-core` in `/tmp/pw`, outside the repo) driving the installed Chrome at 390 px, compared with `docs/design/`.
+- UI differences from the prototype (deliberate): header back arrow sits at the reading start (right) next to the title; "edit email" opens an inline form (needs `PUT /api/email`); the prototype's "simulation: click the email link" boxes are not built; the password rule is "upper- and lower-case Latin letters" (what the API enforces) instead of "an upper-case letter".
+- Quasar here has no `build.rtl`; RTL is `direction: rtl` in CSS (see `docs/frontend.md`). The IRANSans font file is not in the repo: Tahoma is the fallback until it is added.
+
 ## Problems
+- Found by browser testing: `throttle:N,M` without a prefix shares one counter between every route (progress/heartbeat calls ate the payment and login quota). Every throttled route now has its own prefix (test added).
 - CI `api` job failed once because tests depended on `SANCTUM_STATEFUL_DOMAINS` in `.env`; fixed in `TestCase`.

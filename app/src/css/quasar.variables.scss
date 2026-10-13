@@ -23,3 +23,12 @@ $positive: #2fb45a;
 $negative: #e5484d;
 $info: #4cc3ef;
 $warning: #f5b83d;
+
+// Palette from docs/design (the prototype). Components use these through CSS variables, never hex.
+$surface: #161c4d;
+$surface-2: #20286a;
+$line: #2a3270;
+$muted: #a3abd6;
+$page: #0b1033;
+$typography-font-family: 'IRANSans', 'Vazirmatn', Tahoma, 'Segoe UI', sans-serif;
+$accent-light: #6fdc92;

@@ -23,7 +23,7 @@ class QuestionController extends Controller
     {
         abort_unless($request->user()->canReadPremium(), 403, __('questions.subscribers_only'));
 
-        $data = $request->validate(['body' => ['required', 'string', 'min:5', 'max:2000']]);
+        $data = $request->validate(['body' => ['required', 'string', 'min:5', 'max:500']]);
         $question = $request->user()->questions()->create($data);
 
         return (new QuestionResource($question))->response()->setStatusCode(201);

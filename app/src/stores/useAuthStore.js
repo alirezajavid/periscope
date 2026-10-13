@@ -20,16 +20,23 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
-  async function register(payload) {
-    const { data } = await api.post('/api/register', payload)
+  async function submitAndStore(request) {
+    const { data } = await request
     user.value = data.data
   }
 
-  async function login(payload) {
-    const { data } = await api.post('/api/login', payload)
-    user.value = data.data
-  }
+  const register = (payload) => submitAndStore(api.post('/api/register', payload))
+  const login = (payload) => submitAndStore(api.post('/api/login', payload))
+  const otpLogin = (payload) => submitAndStore(api.post('/api/otp/login', payload))
+  const updateEmail = (email) => submitAndStore(api.put('/api/email', { email }))
+  const updateProfile = (payload) => submitAndStore(api.put('/api/profile', payload))
 
+  const sendOtp = (phone) => api.post('/api/otp/send', { phone })
+  const forgotPassword = (payload) => api.post('/api/forgot-password', payload)
+  const resetPassword = (payload) => api.post('/api/reset-password', payload)
+  const resendVerification = () => api.post('/api/email/resend')
+
+  // Logging out also empties anything cached for offline playback (see usePlayerStore)
   async function logout() {
     await api.post('/api/logout')
     user.value = null
@@ -45,10 +52,6 @@ export const useAuthStore = defineStore('auth', () => {
     user.value = null
   }
 
-  const forgotPassword = (payload) => api.post('/api/forgot-password', payload)
-  const resetPassword = (payload) => api.post('/api/reset-password', payload)
-  const resendVerification = () => api.post('/api/email/resend')
-
   return {
     user,
     loaded,
@@ -57,12 +60,16 @@ export const useAuthStore = defineStore('auth', () => {
     fetchUser,
     register,
     login,
-    logout,
-    logoutAll,
-    changePassword,
+    otpLogin,
+    updateEmail,
+    updateProfile,
+    sendOtp,
     forgotPassword,
     resetPassword,
     resendVerification,
+    logout,
+    logoutAll,
+    changePassword,
   }
 })
 

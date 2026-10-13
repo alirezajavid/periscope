@@ -1,1 +1,190 @@
-// app global css
+// Global styles. Colors come from quasar.variables.scss (docs/design palette).
+// The IRANSans font files are not in the repo yet; until they are added the stack falls back to Tahoma.
+// To add them: put woff2 files in src/assets/fonts and declare @font-face here.
+
+:root {
+  --page: #{$page};
+  --surface: #{$surface};
+  --surface-2: #{$surface-2};
+  --line: #{$line};
+  --muted: #{$muted};
+  --primary: #{$primary};
+  --purple: #{$secondary};
+  --green: #{$accent};
+  --red: #{$negative};
+  --amber: #{$warning};
+  --tabbar-height: 72px;
+  --miniplayer-height: 60px;
+}
+
+// Quasar's normalize.sass hard-codes `direction: ltr`; this build has no RTL stylesheet, so set it here.
+html,
+body,
+#q-app {
+  direction: rtl;
+}
+
+html,
+body {
+  background: var(--page);
+  color: #fff;
+  font-family: $typography-font-family;
+  font-size: 15px;
+  -webkit-tap-highlight-color: transparent;
+}
+
+// Quasar's default headings are huge (h1: 6rem line-height); this app sets sizes itself.
+h1,
+h2,
+h3,
+h4 {
+  line-height: 1.5;
+  letter-spacing: normal;
+  font-weight: 700;
+}
+
+// iOS safe areas for the installed PWA
+body {
+  padding-top: env(safe-area-inset-top);
+}
+
+.app-page {
+  width: 100%;
+  max-width: 480px;
+  margin: 0 auto;
+  padding: 16px 16px 24px;
+}
+
+// Pages that sit above the tab bar and the mini-player leave room for them.
+.has-tabbar {
+  padding-bottom: calc(var(--tabbar-height) + 24px + env(safe-area-inset-bottom));
+}
+
+.has-miniplayer {
+  padding-bottom: calc(
+    var(--tabbar-height) + var(--miniplayer-height) + 32px + env(safe-area-inset-bottom)
+  );
+}
+
+.page-title {
+  font-size: 22px;
+  font-weight: 700;
+  line-height: 1.5;
+  margin: 8px 0 16px;
+}
+
+.muted {
+  color: var(--muted);
+}
+
+.field-label {
+  display: block;
+  color: var(--muted);
+  font-size: 13px;
+  margin: 14px 0 6px;
+}
+
+.card {
+  background: var(--surface);
+  border-radius: 20px;
+  padding: 16px;
+}
+
+// Buttons: tall, rounded, as in the prototype
+.btn {
+  height: 52px;
+  border-radius: 16px;
+  font-size: 16px;
+  font-weight: 700;
+  width: 100%;
+}
+
+.btn-link {
+  color: var(--primary);
+  font-size: 14px;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 12px;
+  border-radius: 999px;
+  font-size: 12px;
+  line-height: 24px;
+  background: var(--surface-2);
+}
+
+.chip--premium {
+  background: var(--purple);
+}
+
+.chip--free {
+  background: rgba($accent, 0.18);
+  color: $accent-light;
+}
+
+.chip--ok {
+  background: rgba($accent, 0.18);
+  color: $accent-light;
+}
+
+// Post body (sanitised HTML from the API) — the only place v-html is used
+.prose {
+  line-height: 2;
+  font-size: 15px;
+  unicode-bidi: plaintext;
+
+  p {
+    margin: 0 0 14px;
+  }
+
+  h2,
+  h3 {
+    font-weight: 700;
+    margin: 20px 0 8px;
+  }
+
+  h2 {
+    font-size: 19px;
+  }
+
+  h3 {
+    font-size: 17px;
+  }
+
+  blockquote {
+    margin: 12px 0;
+    padding: 4px 14px;
+    border-inline-start: 3px solid var(--purple);
+    color: var(--muted);
+  }
+
+  a {
+    color: var(--primary);
+  }
+
+  ul,
+  ol {
+    padding-inline-start: 22px;
+  }
+}
+
+// Quasar inputs restyled as in the prototype: label above, filled rounded field
+.q-field--outlined .q-field__control {
+  height: 52px;
+  border-radius: 16px;
+  background: var(--surface);
+}
+
+.q-field--outlined .q-field__control:before {
+  border-color: var(--line);
+}
+
+.q-field--focused.q-field--outlined .q-field__control:after {
+  border-color: var(--primary);
+  border-width: 2px;
+}
+
+.btn-link {
+  text-decoration: none;
+}
