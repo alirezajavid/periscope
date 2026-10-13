@@ -20,7 +20,8 @@ First-time setup of the three projects: `docs/setup.md`.
 ## Versions (must match the production server)
 
 PHP 8.3 · MySQL 8.0 · Redis 7 · Node 22 LTS · Laravel and Quasar 2 (Vite) at their latest stable major at setup time.
-After setup, record the exact Laravel major here: `Laravel __`. Do not upgrade any of these without the user asking.
+Installed at setup (2026-10-13), exact versions: Laravel 13.35.0 · PHP 8.3.6 · MySQL 8.0.46 · Redis 7.0.15 · Node 22.22.0. Laravel major: `Laravel 13`.
+Do not upgrade any of these without the user asking.
 
 ## Non-negotiable domain rules
 
