@@ -24,9 +24,11 @@ Read this file and `CLAUDE.md` first in every new session.
 - feat/playback-progress: `PUT /api/posts/{id}/progress` (position + device; doubles as lock heartbeat), `GET /api/continue`, admin listening stats (started, completed ≥ 90 %, completion %, average time).
 - feat/playback-progress merged.
 - feat/questions-settings: subscriber questions (+ admin star/answer with text and/or episode), key-value settings (links, about/terms/install pages sanitized, maintenance switch, support items with server-made QR SVG for crypto addresses, no extra package).
+- feat/questions-settings merged.
+- feat/users-and-notifications: admin user list/detail (watermark payload, subscriptions, payments, sessions, logins), block/unblock/logout-all, admin-created accounts (set-password link by email, resend), profile update, new-episode email (`periscope:notify-new-episodes`, every 5 min) with signed one-click unsubscribe.
 
 ## In progress
-- feat/questions-settings (merging)
+- feat/users-and-notifications (merging)
 
 ## Remaining
 Per the overnight plan: auth (OTP, Google), admin auth (TOTP), posts, payments/subscriptions, watermark, text fingerprint, remaining APIs, `docs/api.md`, app UI, admin UI.
@@ -54,6 +56,9 @@ Per the overnight plan: auth (OTP, Google), admin auth (TOTP), posts, payments/s
 
 - Text mark = first 8 hex digits (32 bits) of the user's 128-bit `watermark_payload`, placed right after an ASCII space; stored text stays clean; free posts are not marked. Stripping the two characters from a marked body gives back the stored body byte for byte (tested), and ZWNJ counts are unchanged.
 - **Manual test still needed:** copy a marked paragraph from the app into Telegram and back, and check the invisible characters survive (reference.md §5). Cannot be automated here.
+
+- Admin-created accounts (Telegram subscribers): no permanent password is ever set; the person gets a set-password link (valid 60 min like every reset link). The admin can resend it from the user page (`POST /api/admin/users/{id}/send-password-link`). This answers the open security question in reference.md §6.
+- New-episode emails go to active users with a verified email who did not opt out; only posts published within the last day are announced (so importing old episodes does not mail everyone).
 
 ## Problems
 - CI `api` job failed once because tests depended on `SANCTUM_STATEFUL_DOMAINS` in `.env`; fixed in `TestCase`.

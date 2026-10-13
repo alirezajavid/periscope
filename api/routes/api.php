@@ -23,12 +23,14 @@ use App\Http\Controllers\Api\PlanController;
 use App\Http\Controllers\Api\PlaybackLockController;
 use App\Http\Controllers\Api\PostAudioController;
 use App\Http\Controllers\Api\PostController;
+use App\Http\Controllers\Api\ProfileController;
 use App\Http\Controllers\Api\ProgressController;
 use App\Http\Controllers\Api\QuestionController;
 use App\Http\Controllers\Api\SettingController;
 use App\Http\Controllers\Api\StreamAudioController;
 use App\Http\Controllers\Api\SubscriptionController;
 use App\Http\Controllers\Api\TagController;
+use App\Http\Controllers\Api\UnsubscribeController;
 use Illuminate\Support\Facades\Route;
 
 Route::post('/register', RegisterController::class)->middleware('throttle:10,1');
@@ -43,6 +45,7 @@ Route::get('/email/verify/{id}/{hash}', VerifyEmailController::class)
 
 Route::get('/plans', [PlanController::class, 'index']);
 Route::get('/tags', [TagController::class, 'index']);
+Route::get('/unsubscribe/{user}', UnsubscribeController::class)->middleware('signed')->name('unsubscribe');
 Route::get('/settings', [SettingController::class, 'index']);
 Route::get('/support', [SettingController::class, 'support']);
 Route::get('/feed/free.xml', FeedController::class);
@@ -61,6 +64,7 @@ Route::middleware(['auth:sanctum', 'active', 'device'])->group(function () {
     Route::get('/payments', [PaymentController::class, 'index']);
     Route::post('/payments', [PaymentController::class, 'store'])->middleware('throttle:10,1');
     Route::get('/subscription', SubscriptionController::class);
+    Route::put('/profile', [ProfileController::class, 'update']);
     Route::get('/questions', [QuestionController::class, 'index']);
     Route::post('/questions', [QuestionController::class, 'store'])->middleware('throttle:20,1');
     Route::get('/continue', ContinueListeningController::class);
