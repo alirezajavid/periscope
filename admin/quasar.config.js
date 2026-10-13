@@ -102,6 +102,7 @@ export default defineConfig((ctx) => {
       // vueDevtools: true,
       // https: true,
       open: false,
+      port: 9001, // app/ uses 9000
       fs: { allow: ['..'] }, // lets Vite serve ../shared
     },
 
