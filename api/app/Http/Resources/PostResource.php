@@ -2,7 +2,9 @@
 
 namespace App\Http\Resources;
 
+use App\Enums\PostAccess;
 use App\Models\Post;
+use App\Services\TextFingerprint\TextFingerprint;
 use App\Support\EmbedUrl;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
@@ -18,6 +20,18 @@ use Illuminate\Support\Facades\Storage;
  */
 class PostResource extends JsonResource
 {
+    /** Premium text carries the reader's invisible mark; free text is public and stays clean. */
+    private function bodyFor(Request $request): ?string
+    {
+        $user = $request->user();
+
+        if ($this->body === null || $user === null || $this->access === PostAccess::Free) {
+            return $this->body;
+        }
+
+        return app(TextFingerprint::class)->mark($this->body, $user);
+    }
+
     /** @return array<int|string, mixed> */
     public function toArray(Request $request): array
     {
@@ -38,7 +52,7 @@ class PostResource extends JsonResource
             'tags' => $this->whenLoaded('tags', fn () => $this->tags->pluck('name')),
             'locked' => ! $canView,
             $this->mergeWhen($canView, fn () => [
-                'body' => $this->body,
+                'body' => $this->bodyFor($request),
                 'embed_url' => EmbedUrl::extract($this->embed_code),
             ]),
         ];

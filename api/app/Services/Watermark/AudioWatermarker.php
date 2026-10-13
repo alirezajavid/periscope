@@ -33,6 +33,23 @@ class AudioWatermarker
         }
     }
 
+    /** Read the 128-bit payload from a leaked recording; null when no watermark is found. */
+    public function extract(string $file): ?string
+    {
+        $workDir = sys_get_temp_dir().'/leak-'.bin2hex(random_bytes(4));
+        File::ensureDirectoryExists($workDir);
+
+        try {
+            $wav = "{$workDir}/leak.wav";
+            $this->run(['ffmpeg', '-y', '-i', $file, '-ac', '1', '-ar', '44100', $wav]);
+            $output = $this->run(['audiowmark', 'get', $wav]);
+
+            return preg_match('/\b([0-9a-f]{32})\b/i', $output, $match) ? strtolower($match[1]) : null;
+        } finally {
+            File::deleteDirectory($workDir);
+        }
+    }
+
     /** Duration in whole seconds. */
     public function duration(string $file): int
     {

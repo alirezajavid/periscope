@@ -18,9 +18,11 @@ Read this file and `CLAUDE.md` first in every new session.
 - feat/posts: posts/tags, PostPolicy (preview vs full content), HTMLPurifier whitelist (ZWNJ preserved), scheduling by `published_at`, public + admin APIs, cover/audio upload, MirrorFileToForeignHost job, RSS of free episodes + public audio of free episodes.
 - feat/posts merged.
 - feat/watermark-audio: `GeneratePersonalizedAudio` job (ffmpeg → audiowmark → 64 kbps MP3 via `Process`, argument arrays), `periscope:build-watermarks` (hourly, 3 h before publish, recently active listeners first), `periscope:cleanup-watermarks` (7-day keep), signed relative URLs (2 h), `GET /api/posts/{id}/audio?device=` (ready/preparing), one-device playback lock with heartbeat/release, admin watermark counts + failed list + retry.
+- feat/watermark-audio merged.
+- feat/text-fingerprint: invisible per-reader marks (U+200B/U+2060, 32-bit code, one per paragraph/list item/quote) added to premium bodies at response time; `TextFingerprint::identify()`; admin leak checks for text and audio (`audiowmark get`) with history in `leak_checks`.
 
 ## In progress
-- feat/watermark-audio (merging)
+- feat/text-fingerprint (merging)
 
 ## Remaining
 Per the overnight plan: auth (OTP, Google), admin auth (TOTP), posts, payments/subscriptions, watermark, text fingerprint, remaining APIs, `docs/api.md`, app UI, admin UI.
@@ -45,6 +47,9 @@ Per the overnight plan: auth (OTP, Google), admin auth (TOTP), posts, payments/s
 - Run a worker for all queues: `php artisan queue:work redis --queue=watermark-priority,watermark,default` and the scheduler (`php artisan schedule:work` locally, cron `schedule:run` in production).
 - Audio URLs are signed on the path only (`signed:relative`), so the same URL works through the foreign mirror's reverse proxy (`PERISCOPE_FOREIGN_URL`) for users who chose that server.
 - `audiowmark` is not installed on this machine: the pipeline is tested with `Process::fake()` only. It must be tried with a real episode before launch (see the command at the end of reference.md §11).
+
+- Text mark = first 8 hex digits (32 bits) of the user's 128-bit `watermark_payload`, placed right after an ASCII space; stored text stays clean; free posts are not marked. Stripping the two characters from a marked body gives back the stored body byte for byte (tested), and ZWNJ counts are unchanged.
+- **Manual test still needed:** copy a marked paragraph from the app into Telegram and back, and check the invisible characters survive (reference.md §5). Cannot be automated here.
 
 ## Problems
 - CI `api` job failed once because tests depended on `SANCTUM_STATEFUL_DOMAINS` in `.env`; fixed in `TestCase`.
