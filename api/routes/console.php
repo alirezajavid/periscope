@@ -10,3 +10,4 @@ Artisan::command('inspire', function () {
 
 Schedule::command('periscope:build-watermarks')->hourly()->withoutOverlapping();
 Schedule::command('periscope:cleanup-watermarks')->dailyAt('04:00');
+Schedule::command('periscope:notify-new-episodes')->everyFiveMinutes()->withoutOverlapping();

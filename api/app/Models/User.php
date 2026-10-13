@@ -80,6 +80,12 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->hasMany(Subscription::class);
     }
 
+    /** @return HasMany<LoginEvent, $this> */
+    public function loginEvents(): HasMany
+    {
+        return $this->hasMany(LoginEvent::class);
+    }
+
     /** @return HasMany<PersonalizedFile, $this> */
     public function personalizedFiles(): HasMany
     {

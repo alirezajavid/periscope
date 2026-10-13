@@ -16,6 +16,7 @@ use App\Http\Controllers\Admin\PostController;
 use App\Http\Controllers\Admin\QuestionController;
 use App\Http\Controllers\Admin\SettingController;
 use App\Http\Controllers\Admin\TagController;
+use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\UserSubscriptionController;
 use App\Http\Controllers\Admin\WatermarkController;
 use Illuminate\Support\Facades\Route;
@@ -59,5 +60,12 @@ Route::middleware(['auth:sanctum', 'admin.idle', 'admin'])->group(function () {
     Route::post('/leak-checks/text', [LeakCheckController::class, 'text'])->middleware('throttle:30,1');
     Route::post('/leak-checks/audio', [LeakCheckController::class, 'audio'])->middleware('throttle:10,1');
 
+    Route::get('/users', [UserController::class, 'index']);
+    Route::post('/users', [UserController::class, 'store']);
+    Route::get('/users/{user}', [UserController::class, 'show']);
+    Route::post('/users/{user}/block', [UserController::class, 'block']);
+    Route::post('/users/{user}/unblock', [UserController::class, 'unblock']);
+    Route::post('/users/{user}/logout-all', [UserController::class, 'logoutAll']);
+    Route::post('/users/{user}/send-password-link', [UserController::class, 'sendPasswordLink']);
     Route::post('/users/{user}/subscriptions', [UserSubscriptionController::class, 'store']);
 });
