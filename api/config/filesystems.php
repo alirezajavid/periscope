@@ -38,6 +38,16 @@ return [
             'report' => false,
         ],
 
+        // Foreign mirror: a plain local folder in development; point FOREIGN_DISK at a
+        // remote disk (e.g. SFTP) in production.
+        'foreign' => [
+            'driver' => 'local',
+            'root' => storage_path('app/foreign'),
+            'visibility' => 'private',
+            'throw' => false,
+            'report' => false,
+        ],
+
         'public' => [
             'driver' => 'local',
             'root' => storage_path('app/public'),

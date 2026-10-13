@@ -14,10 +14,14 @@ use App\Http\Controllers\Api\Auth\SendOtpController;
 use App\Http\Controllers\Api\Auth\StartPhoneVerificationController;
 use App\Http\Controllers\Api\Auth\VerifyEmailController;
 use App\Http\Controllers\Api\Auth\VerifyPhoneController;
+use App\Http\Controllers\Api\FeedController;
+use App\Http\Controllers\Api\FreeAudioController;
 use App\Http\Controllers\Api\PaymentController;
 use App\Http\Controllers\Api\PaymentMethodController;
 use App\Http\Controllers\Api\PlanController;
+use App\Http\Controllers\Api\PostController;
 use App\Http\Controllers\Api\SubscriptionController;
+use App\Http\Controllers\Api\TagController;
 use Illuminate\Support\Facades\Route;
 
 Route::post('/register', RegisterController::class)->middleware('throttle:10,1');
@@ -31,6 +35,15 @@ Route::get('/email/verify/{id}/{hash}', VerifyEmailController::class)
     ->name('verification.verify');
 
 Route::get('/plans', [PlanController::class, 'index']);
+Route::get('/tags', [TagController::class, 'index']);
+Route::get('/feed/free.xml', FeedController::class);
+Route::get('/posts/{id}/free-audio', FreeAudioController::class);
+
+// Open to everyone; what a post contains depends on who is asking (see PostPolicy).
+Route::middleware(['active', 'device'])->group(function () {
+    Route::get('/posts', [PostController::class, 'index']);
+    Route::get('/posts/{id}', [PostController::class, 'show']);
+});
 
 Route::middleware(['auth:sanctum', 'active', 'device'])->group(function () {
     Route::get('/payment-methods', [PaymentMethodController::class, 'index']);

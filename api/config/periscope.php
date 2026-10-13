@@ -8,6 +8,12 @@ return [
     // SMS provider for OTP codes. Only `log` (writes the code to the log) exists for now.
     'sms' => ['driver' => env('SMS_DRIVER', 'log')],
 
+    // Video hosts whose embed URLs are accepted in posts.
+    'embed_hosts' => ['www.aparat.com', 'aparat.com'],
+
+    // Disk that receives the one-way copy for the foreign mirror (config/filesystems.php).
+    'foreign_disk' => env('FOREIGN_DISK', 'foreign'),
+
     // Signed URL lifetime for personalized audio, in minutes.
     'audio_url_ttl' => (int) env('PERISCOPE_AUDIO_URL_TTL', 120),
 
