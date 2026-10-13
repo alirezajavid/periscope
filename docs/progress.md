@@ -84,3 +84,5 @@ API is complete (see `docs/api.md`). Left: app screens (home, episode, search, a
 
 - Admin UI: RTL by CSS like the app; CSRF token comes from `/api/admin/csrf-token`; logging in regenerates the session, so the shared client refetches the token and repeats a request once after a 419. The setup QR is shown as an `<img>` with a data URL, never `v-html`.
 - Problem: one commit (6962207) reached `main` directly because the ship helper was run while on `main`; the helper now refuses `main`. Nothing in it was wrong in CI terms, but it skipped the PR step.
+- Admin sidebar: this Quasar version mirrors layout offsets for RTL but its stylesheet keeps `.q-drawer--left` on the physical left; `admin/src/css/app.scss` pins it to the right so the sidebar and the content offset agree.
+- Admin: users (list, create, detail with block/unblock, logout everywhere, resend set-password link, manual subscription) and the payment queue (receipt shown from a blob fetched with the admin session, approve with optional start date, reject with reason; both behind a confirm dialog that states the consequence) are done and checked in the browser at 1440 and 390 px.
