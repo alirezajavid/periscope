@@ -1,7 +1,7 @@
 {
   "orientation": "portrait",
-  "background_color": "#ffffff",
-  "theme_color": "#027be3",
+  "background_color": "#0B1033",
+  "theme_color": "#0B1033",
   "display_override": ["fullscreen", "minimal-ui"],
   "display": "standalone",
   "icons": [
@@ -42,5 +42,12 @@
       "type": "image/png",
       "purpose": "monochrome"
     }
-  ]
+  ],
+  "name": "پریسکوپ",
+  "short_name": "پریسکوپ",
+  "description": "اپ پادکست پریسکوپ",
+  "lang": "fa",
+  "dir": "rtl",
+  "start_url": "/",
+  "scope": "/"
 }

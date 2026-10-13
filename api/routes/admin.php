@@ -24,10 +24,10 @@ use Illuminate\Support\Facades\Route;
 // Registered in bootstrap/app.php under the /api/admin prefix; uses its own session cookie.
 
 Route::get('/csrf-token', CsrfTokenController::class);
-Route::post('/login', AdminLoginController::class)->middleware('throttle:5,1');
-Route::post('/two-factor/setup', TwoFactorSetupController::class)->middleware('throttle:10,1');
-Route::post('/two-factor/confirm', TwoFactorConfirmController::class)->middleware('throttle:5,1');
-Route::post('/two-factor/challenge', TwoFactorChallengeController::class)->middleware('throttle:5,1');
+Route::post('/login', AdminLoginController::class)->middleware('throttle:5,1,admin-login');
+Route::post('/two-factor/setup', TwoFactorSetupController::class)->middleware('throttle:10,1,two-factor-setup');
+Route::post('/two-factor/confirm', TwoFactorConfirmController::class)->middleware('throttle:5,1,two-factor-confirm');
+Route::post('/two-factor/challenge', TwoFactorChallengeController::class)->middleware('throttle:5,1,two-factor-challenge');
 
 Route::middleware(['auth:sanctum', 'admin.idle', 'admin'])->group(function () {
     Route::get('/user', AdminMeController::class);
@@ -57,8 +57,8 @@ Route::middleware(['auth:sanctum', 'admin.idle', 'admin'])->group(function () {
     Route::put('/settings', [SettingController::class, 'update']);
     Route::get('/stats/listening', ListeningStatsController::class);
     Route::get('/leak-checks', [LeakCheckController::class, 'index']);
-    Route::post('/leak-checks/text', [LeakCheckController::class, 'text'])->middleware('throttle:30,1');
-    Route::post('/leak-checks/audio', [LeakCheckController::class, 'audio'])->middleware('throttle:10,1');
+    Route::post('/leak-checks/text', [LeakCheckController::class, 'text'])->middleware('throttle:30,1,leak-checks-text');
+    Route::post('/leak-checks/audio', [LeakCheckController::class, 'audio'])->middleware('throttle:10,1,leak-checks-audio');
 
     Route::get('/users', [UserController::class, 'index']);
     Route::post('/users', [UserController::class, 'store']);

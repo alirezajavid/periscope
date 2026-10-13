@@ -15,7 +15,7 @@ Session: 60 days sliding, stored in Redis. A change of browser family or OS fami
 
 **Premium content.** A premium post is returned to non-subscribers as a preview: `locked: true`, with title, cover, excerpt and metadata only. `body` and `embed_url` are absent and no audio URL ever appears in a post (audio has its own endpoint).
 
-**Rate limits.** Login-type endpoints are throttled (429). Retry later.
+**Rate limits.** Login, OTP, password-reset, payment and similar endpoints are throttled per route (429). Retry later.
 
 ---
 
@@ -23,7 +23,7 @@ Session: 60 days sliding, stored in Redis. A change of browser family or OS fami
 
 | Method & path | Access | Input | Output |
 |---|---|---|---|
-| `POST /register` | public | `name`, `email`, `password`, `password_confirmation` (min 8) | 201 user; signed in; verification email sent |
+| `POST /register` | public | `name`, `email`, `password`, `password_confirmation` (min 8, with a digit and upper- and lower-case Latin letters) | 201 user; signed in; verification email sent |
 | `POST /login` | public | `email`, `password` | user. 422 wrong credentials, 403 blocked, 429 throttled (5/min) |
 | `POST /logout` | user | — | 204 |
 | `POST /logout-all` | user | — | 204; ends every session of the user, including this one |
@@ -34,6 +34,7 @@ Session: 60 days sliding, stored in Redis. A change of browser family or OS fami
 | `POST /reset-password` | public | `token`, `email`, `password`, `password_confirmation` | message; ends every session of that user |
 | `GET /email/verify/{id}/{hash}` | public (signed link) | — | redirect to the app (`/#/email-verified`) |
 | `POST /email/resend` | user | — | message |
+| `PUT /email` | user (unverified email only) | `email` | user; fixes a mistyped address right after sign-up and re-sends the verification link. 403 once the email is verified |
 | `POST /otp/send` | public | `phone` (09…, +98…, Persian digits ok) | message. 429 within 60 s of the previous code. In development the code is written to `storage/logs/laravel.log` (`SMS_DRIVER=log`) |
 | `POST /otp/login` | public | `phone`, `code` (6 digits), `name` (only for a first-time number) | user (201 on sign-up, 200 on sign-in). 422 on `code`, or on `name` when it is needed (the code is not spent then). 5 wrong attempts lock the code (5 min lifetime) |
 | `POST /phone` | user | `phone` | message; sends a code to attach a number to the account |
@@ -73,7 +74,7 @@ Session: 60 days sliding, stored in Redis. A change of browser family or OS fami
 | `GET /payments` | user | — | own payments, newest first |
 | `GET /subscription` | user | — | `{ active, ends_at, subscriptions: [{plan, starts_at, ends_at}] }` |
 | `GET /questions` | user | — | own questions with answers (`status: new\|starred\|answered`, `answer`, `answered_in_post`) |
-| `POST /questions` | subscriber | `body` (5–2000 chars) | 201 question. 403 for non-subscribers |
+| `POST /questions` | subscriber | `body` (5–500 chars) | 201 question. 403 for non-subscribers |
 
 ---
 

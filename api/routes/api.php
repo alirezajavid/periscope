@@ -12,6 +12,7 @@ use App\Http\Controllers\Api\Auth\ResendVerificationController;
 use App\Http\Controllers\Api\Auth\ResetPasswordController;
 use App\Http\Controllers\Api\Auth\SendOtpController;
 use App\Http\Controllers\Api\Auth\StartPhoneVerificationController;
+use App\Http\Controllers\Api\Auth\UpdateEmailController;
 use App\Http\Controllers\Api\Auth\VerifyEmailController;
 use App\Http\Controllers\Api\Auth\VerifyPhoneController;
 use App\Http\Controllers\Api\ContinueListeningController;
@@ -33,14 +34,14 @@ use App\Http\Controllers\Api\TagController;
 use App\Http\Controllers\Api\UnsubscribeController;
 use Illuminate\Support\Facades\Route;
 
-Route::post('/register', RegisterController::class)->middleware('throttle:10,1');
+Route::post('/register', RegisterController::class)->middleware('throttle:10,1,register');
 Route::post('/login', LoginController::class)->middleware('throttle:login');
-Route::post('/otp/send', SendOtpController::class)->middleware('throttle:10,1');
+Route::post('/otp/send', SendOtpController::class)->middleware('throttle:10,1,otp-send');
 Route::post('/otp/login', OtpLoginController::class)->middleware('throttle:login');
-Route::post('/forgot-password', ForgotPasswordController::class)->middleware('throttle:5,1');
-Route::post('/reset-password', ResetPasswordController::class)->middleware('throttle:5,1');
+Route::post('/forgot-password', ForgotPasswordController::class)->middleware('throttle:5,1,forgot-password');
+Route::post('/reset-password', ResetPasswordController::class)->middleware('throttle:5,1,reset-password');
 Route::get('/email/verify/{id}/{hash}', VerifyEmailController::class)
-    ->middleware(['signed', 'throttle:6,1'])
+    ->middleware(['signed', 'throttle:6,1,verify-email'])
     ->name('verification.verify');
 
 Route::get('/plans', [PlanController::class, 'index']);
@@ -62,22 +63,23 @@ Route::middleware(['active', 'device'])->group(function () {
 Route::middleware(['auth:sanctum', 'active', 'device'])->group(function () {
     Route::get('/payment-methods', [PaymentMethodController::class, 'index']);
     Route::get('/payments', [PaymentController::class, 'index']);
-    Route::post('/payments', [PaymentController::class, 'store'])->middleware('throttle:10,1');
+    Route::post('/payments', [PaymentController::class, 'store'])->middleware('throttle:10,1,payments');
     Route::get('/subscription', SubscriptionController::class);
     Route::put('/profile', [ProfileController::class, 'update']);
     Route::get('/questions', [QuestionController::class, 'index']);
-    Route::post('/questions', [QuestionController::class, 'store'])->middleware('throttle:20,1');
+    Route::post('/questions', [QuestionController::class, 'store'])->middleware('throttle:20,1,questions');
     Route::get('/continue', ContinueListeningController::class);
     Route::get('/posts/{id}/progress', [ProgressController::class, 'show']);
-    Route::put('/posts/{id}/progress', [ProgressController::class, 'update'])->middleware('throttle:120,1');
+    Route::put('/posts/{id}/progress', [ProgressController::class, 'update'])->middleware('throttle:120,1,posts-id-progress');
     Route::post('/playback/heartbeat', [PlaybackLockController::class, 'heartbeat']);
     Route::post('/playback/release', [PlaybackLockController::class, 'release']);
 
     Route::get('/user', MeController::class);
     Route::post('/logout', LogoutController::class);
     Route::post('/logout-all', LogoutAllController::class);
-    Route::post('/phone', StartPhoneVerificationController::class)->middleware('throttle:5,1');
-    Route::post('/phone/verify', VerifyPhoneController::class)->middleware('throttle:10,1');
+    Route::post('/phone', StartPhoneVerificationController::class)->middleware('throttle:5,1,phone');
+    Route::post('/phone/verify', VerifyPhoneController::class)->middleware('throttle:10,1,phone-verify');
     Route::put('/password', ChangePasswordController::class);
-    Route::post('/email/resend', ResendVerificationController::class)->middleware('throttle:3,1');
+    Route::put('/email', UpdateEmailController::class)->middleware('throttle:5,1,email');
+    Route::post('/email/resend', ResendVerificationController::class)->middleware('throttle:3,1,email-resend');
 });

@@ -17,16 +17,33 @@ const routes = [
         component: () => import('@/pages/LoginPage.vue'),
       },
       {
+        path: 'login/phone',
+        name: 'login-phone',
+        meta: { guestOnly: true },
+        component: () => import('@/pages/LoginPhonePage.vue'),
+      },
+      {
         path: 'register',
         name: 'register',
         meta: { guestOnly: true },
         component: () => import('@/pages/RegisterPage.vue'),
       },
       {
+        path: 'verify-email',
+        name: 'verify-email',
+        meta: { requiresAuth: true },
+        component: () => import('@/pages/VerifyEmailPage.vue'),
+      },
+      {
         path: 'forgot-password',
         name: 'forgot-password',
         meta: { guestOnly: true },
         component: () => import('@/pages/ForgotPasswordPage.vue'),
+      },
+      {
+        path: 'reset-link-sent',
+        name: 'reset-link-sent',
+        component: () => import('@/pages/ResetLinkSentPage.vue'),
       },
       {
         path: 'reset-password',
@@ -37,6 +54,29 @@ const routes = [
         path: 'email-verified',
         name: 'email-verified',
         component: () => import('@/pages/EmailVerifiedPage.vue'),
+      },
+      {
+        path: 'unsubscribed',
+        name: 'unsubscribed',
+        component: () => import('@/pages/UnsubscribedPage.vue'),
+      },
+      {
+        path: 'terms',
+        name: 'terms',
+        meta: { setting: 'page_terms', titleKey: 'account.terms' },
+        component: () => import('@/pages/StaticPage.vue'),
+      },
+      {
+        path: 'about',
+        name: 'about',
+        meta: { setting: 'page_about', titleKey: 'account.about' },
+        component: () => import('@/pages/StaticPage.vue'),
+      },
+      {
+        path: 'install',
+        name: 'install',
+        meta: { setting: 'page_install_guide', titleKey: 'account.installGuide' },
+        component: () => import('@/pages/StaticPage.vue'),
       },
     ],
   },

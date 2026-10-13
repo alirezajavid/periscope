@@ -45,3 +45,22 @@ it('resends the verification email only to unverified users', function () {
     Notification::assertSentTo($unverified, VerifyEmail::class);
     Notification::assertNotSentTo($verified, VerifyEmail::class);
 });
+
+it('lets a user fix a mistyped email before verifying, and re-sends the link', function () {
+    Notification::fake();
+    $user = User::factory()->unverified()->create(['email' => 'wrong@example.com']);
+
+    asUser($user)->putJson('/api/email', ['email' => 'right@example.com'])->assertOk()->assertJsonPath('data.email', 'right@example.com');
+
+    expect($user->fresh()->email)->toBe('right@example.com');
+    Notification::assertSentTo($user->fresh(), VerifyEmail::class);
+});
+
+it('does not allow changing a verified email or taking someone else\'s', function () {
+    $verified = User::factory()->create();
+    $unverified = User::factory()->unverified()->create();
+    $other = User::factory()->create(['email' => 'taken@example.com']);
+
+    asUser($verified)->putJson('/api/email', ['email' => 'new@example.com'])->assertForbidden();
+    asUser($unverified)->putJson('/api/email', ['email' => 'taken@example.com'])->assertUnprocessable()->assertJsonValidationErrors('email');
+});
