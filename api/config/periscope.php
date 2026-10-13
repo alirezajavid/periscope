@@ -17,6 +17,17 @@ return [
     // Public base URL of the foreign mirror (a reverse proxy to this app); empty = no mirror URLs.
     'foreign_url' => env('PERISCOPE_FOREIGN_URL'),
 
+    // Editable settings and how each one is validated (see Admin\SettingController).
+    'settings' => [
+        'social_links' => ['array', 'max:20'],
+        'support_items' => ['array', 'max:20'],
+        'page_about' => ['nullable', 'string', 'max:100000'],
+        'page_terms' => ['nullable', 'string', 'max:100000'],
+        'page_install_guide' => ['nullable', 'string', 'max:100000'],
+        'maintenance' => ['boolean'],
+        'maintenance_message' => ['nullable', 'string', 'max:1000'],
+    ],
+
     // Signed URL lifetime for personalized audio, in minutes.
     'audio_url_ttl' => (int) env('PERISCOPE_AUDIO_URL_TTL', 120),
 
