@@ -62,6 +62,24 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->hasMany(UserSession::class);
     }
 
+    /** @return HasMany<Subscription, $this> */
+    public function subscriptions(): HasMany
+    {
+        return $this->hasMany(Subscription::class);
+    }
+
+    /** @return HasMany<Payment, $this> */
+    public function payments(): HasMany
+    {
+        return $this->hasMany(Payment::class);
+    }
+
+    /** "Subscriber" means holding a subscription whose end date has not passed. */
+    public function hasActiveSubscription(): bool
+    {
+        return $this->subscriptions()->current()->exists();
+    }
+
     public function isAdmin(): bool
     {
         return $this->role === UserRole::Admin;
