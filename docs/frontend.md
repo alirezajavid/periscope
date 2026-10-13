@@ -18,6 +18,10 @@ src/
 
 ## Rules
 
+- **Font:** IRANSans in both apps (`src/assets/fonts`, `@font-face` in `app.scss`); fallback `Tahoma, sans-serif`.
+- **app/** follows the prototype images in `docs/design/` (390px-wide mobile frames). **admin/** uses plain, standard Quasar (QLayout + QDrawer, QHeader, QTable, QForm, default colors) — Persian and RTL, no custom design.
+- Page → Pinia setup store → `@shared/api/client.js`: pages never call axios directly. Loading / empty / error states use shared components.
+
 - Components: `<script setup>`, `defineProps` with types/defaults, `defineEmits`. Keep pages thin — data fetching in stores or composables.
 - **No hard-coded Persian strings** in templates or scripts: `t('player.speed')` / `$t(...)`. Keys are English, nested by feature.
 - API calls only through the shared client (`@shared/api/client.js`); never create another axios instance. Sanctum SPA cookies: `withCredentials: true` and call `/sanctum/csrf-cookie` before the first write.
