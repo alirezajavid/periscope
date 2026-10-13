@@ -8,7 +8,7 @@ const handlers = { onUnauthenticated: () => {} }
 
 // Shared client: Sanctum SPA cookies + CSRF. Import `api` wherever a request is needed.
 const api = createClient(axios, {
-  baseURL: process.env.API_URL,
+  baseURL: import.meta.env.API_URL,
   onUnauthenticated: (status) => handlers.onUnauthenticated(status),
 })
 

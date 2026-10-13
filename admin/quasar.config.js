@@ -48,7 +48,7 @@ export default defineConfig((ctx) => {
         '@shared': fileURLToPath(new URL('../shared', import.meta.url)),
       },
 
-      env: {
+      defineEnv: {
         API_URL: process.env.API_URL || 'http://localhost:8000',
       },
       // vueRouterBase,
