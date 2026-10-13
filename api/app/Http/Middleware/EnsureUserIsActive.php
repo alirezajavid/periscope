@@ -13,6 +13,11 @@ class EnsureUserIsActive
 {
     public function handle(Request $request, Closure $next): Response
     {
+        // Public endpoints also serve clients without a session (feed readers, curl).
+        if (! $request->hasSession()) {
+            return $next($request);
+        }
+
         if ($request->user()?->isBlocked()) {
             UserSession::where('session_id', $request->session()->getId())->delete();
             Auth::guard('web')->logout();

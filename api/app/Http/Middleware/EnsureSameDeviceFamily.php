@@ -16,6 +16,11 @@ class EnsureSameDeviceFamily
 {
     public function handle(Request $request, Closure $next): Response
     {
+        // Public endpoints also serve clients without a session (feed readers, curl).
+        if (! $request->hasSession()) {
+            return $next($request);
+        }
+
         $stored = $request->session()->get('device');
         $current = UserSession::families($request->userAgent());
 

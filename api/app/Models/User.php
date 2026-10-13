@@ -80,6 +80,12 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->subscriptions()->current()->exists();
     }
 
+    /** Admins and current subscribers may open premium content. */
+    public function canReadPremium(): bool
+    {
+        return $this->isAdmin() || $this->hasActiveSubscription();
+    }
+
     public function isAdmin(): bool
     {
         return $this->role === UserRole::Admin;
