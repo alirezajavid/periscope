@@ -30,8 +30,8 @@ class DemoSeeder extends Seeder
             throw new RuntimeException('DemoSeeder must not run in production.');
         }
 
-        $this->users();
         $this->plans();
+        $this->users();
         $this->settings();
         $this->posts();
     }

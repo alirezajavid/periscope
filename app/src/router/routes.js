@@ -19,6 +19,21 @@ const routes = [
     ],
   },
   {
+    // Full-screen flows without the tab bar
+    path: '/',
+    component: () => import('@/layouts/FlatLayout.vue'),
+    meta: { requiresAuth: true },
+    children: [
+      { path: 'plans', name: 'plans', component: () => import('@/pages/PlansPage.vue') },
+      { path: 'payment', name: 'payment', component: () => import('@/pages/PaymentPage.vue') },
+    ],
+  },
+  {
+    path: '/maintenance',
+    name: 'maintenance',
+    component: () => import('@/pages/MaintenancePage.vue'),
+  },
+  {
     path: '/player',
     name: 'player',
     meta: { requiresAuth: true },
