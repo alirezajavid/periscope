@@ -43,3 +43,23 @@ h4 {
   gap: 12px;
   margin-bottom: 16px;
 }
+
+// Quasar mirrors the layout offsets and slide animation itself when the language is RTL, but this
+// version's stylesheet still pins `.q-drawer--left` to the physical left. Pin it to the right so
+// the sidebar sits at the reading start and the page content is offset on the same side.
+.q-drawer--left {
+  left: auto;
+  right: 0;
+}
+
+.q-drawer--left.q-drawer--bordered {
+  border-right: 0;
+  border-left: 1px solid rgba(0, 0, 0, 0.12);
+}
+
+// Wrapping button row. Quasar's `q-gutter-*` uses negative margins that stick out of the viewport in RTL.
+.actions-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}

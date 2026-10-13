@@ -8,6 +8,9 @@ const routes = [
       { path: 'posts', name: 'posts', component: () => import('@/pages/PostsPage.vue') },
       { path: 'posts/new', name: 'post-new', component: () => import('@/pages/PostEditPage.vue') },
       { path: 'posts/:id', name: 'post-edit', component: () => import('@/pages/PostEditPage.vue') },
+      { path: 'users', name: 'users', component: () => import('@/pages/UsersPage.vue') },
+      { path: 'users/:id', name: 'user', component: () => import('@/pages/UserDetailPage.vue') },
+      { path: 'payments', name: 'payments', component: () => import('@/pages/PaymentsPage.vue') },
     ],
   },
   {

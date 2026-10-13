@@ -17,7 +17,7 @@
     </q-header>
 
     <!-- Desktop-first: a permanent sidebar; on phones it becomes an overlay (breakpoint) -->
-    <q-drawer v-model="drawer" side="right" show-if-above bordered :breakpoint="800">
+    <q-drawer v-model="drawer" side="left" show-if-above bordered :breakpoint="800">
       <q-list padding>
         <q-item
           v-for="item in items"
