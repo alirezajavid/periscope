@@ -52,6 +52,15 @@
       </div>
     </section>
 
+    <section v-if="offlineItems.length" class="stored">
+      <h2>{{ $t('home.stored') }}</h2>
+      <EpisodeRow
+        v-for="item in offlineItems"
+        :key="item.id"
+        :post="{ ...item, has_audio: true, locked: false }"
+      />
+    </section>
+
     <section>
       <div class="list-head">
         <h2>{{ $t('home.all') }}</h2>
@@ -87,6 +96,7 @@ import { usePlayerStore } from '@/stores/usePlayerStore'
 import { usePostsStore } from '@/stores/usePostsStore'
 import { useSubscriptionStore } from '@/stores/useSubscriptionStore'
 import { formatDate } from '@shared/utils/date.js'
+import { storedEpisodes } from '@/services/offlineAudio'
 import { formatNumber, toPersianDigits } from '@shared/utils/number.js'
 
 const router = useRouter()
@@ -94,6 +104,7 @@ const posts = usePostsStore()
 const player = usePlayerStore()
 const subscription = useSubscriptionStore()
 const resume = ref(null)
+const offlineItems = ref([])
 
 const resumeRatio = computed(() => {
   const duration = resume.value?.post.audio_duration
@@ -114,7 +125,10 @@ async function onLoadMore(_index, done) {
 }
 
 onMounted(async () => {
-  posts.load()
+  await posts.load()
+  // The API is unreachable (offline): offer what is stored on this device
+  offlineItems.value = posts.error || !navigator.onLine ? storedEpisodes() : []
+  if (!navigator.onLine) return
   subscription.fetchStatus().catch(() => {})
   try {
     resume.value = (await posts.fetchContinue())[0] ?? null
