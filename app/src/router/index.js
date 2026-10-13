@@ -8,6 +8,7 @@ import {
 
 import routes from './routes.js'
 import { useAuthStore } from '@/stores/useAuthStore'
+import { useSettingsStore } from '@/stores/useSettingsStore'
 
 /*
  * If not building with SSR mode, you can
@@ -37,7 +38,13 @@ export default defineRouter(({ store }) => {
 
   Router.beforeEach(async (to) => {
     const auth = useAuthStore(store)
+    const settings = useSettingsStore(store)
     if (!auth.loaded) await auth.fetchUser()
+    if (!settings.loaded) await settings.fetch().catch(() => {})
+
+    // Maintenance mode: everything except the maintenance page itself
+    if (settings.data.maintenance && to.name !== 'maintenance') return { name: 'maintenance' }
+    if (!settings.data.maintenance && to.name === 'maintenance') return { name: 'home' }
 
     if (to.meta.requiresAuth && !auth.isLoggedIn) return { name: 'login' }
     if (to.meta.guestOnly && auth.isLoggedIn) return { name: 'home' }

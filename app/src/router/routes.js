@@ -3,7 +3,26 @@ const routes = [
     path: '/',
     component: () => import('@/layouts/MainLayout.vue'),
     meta: { requiresAuth: true },
-    children: [{ path: '', name: 'home', component: () => import('@/pages/IndexPage.vue') }],
+    children: [
+      { path: '', name: 'home', component: () => import('@/pages/HomePage.vue') },
+      { path: 'search', name: 'search', component: () => import('@/pages/SearchPage.vue') },
+      { path: 'posts/:id', name: 'post', component: () => import('@/pages/PostPage.vue') },
+      { path: 'ask', name: 'ask', component: () => import('@/pages/AskPage.vue') },
+      { path: 'account', name: 'account', component: () => import('@/pages/AccountPage.vue') },
+      {
+        path: 'account/password',
+        name: 'change-password',
+        component: () => import('@/pages/ChangePasswordPage.vue'),
+      },
+      { path: 'payments', name: 'payments', component: () => import('@/pages/PaymentsPage.vue') },
+      { path: 'support', name: 'support', component: () => import('@/pages/SupportPage.vue') },
+    ],
+  },
+  {
+    path: '/player',
+    name: 'player',
+    meta: { requiresAuth: true },
+    component: () => import('@/pages/PlayerPage.vue'),
   },
 
   {

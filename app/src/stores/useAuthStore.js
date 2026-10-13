@@ -1,6 +1,8 @@
 import { ref, computed } from 'vue'
 import { defineStore, acceptHMRUpdate } from 'pinia'
 import { api } from '@/boot/axios'
+import { usePlayerStore } from '@/stores/usePlayerStore'
+import { useSubscriptionStore } from '@/stores/useSubscriptionStore'
 
 export const useAuthStore = defineStore('auth', () => {
   const user = ref(null)
@@ -36,20 +38,26 @@ export const useAuthStore = defineStore('auth', () => {
   const resetPassword = (payload) => api.post('/api/reset-password', payload)
   const resendVerification = () => api.post('/api/email/resend')
 
-  // Logging out also empties anything cached for offline playback (see usePlayerStore)
+  // Whenever the session ends: stop playing and forget per-user state (offline audio is cleared in usePlayerStore.stop)
+  function clearSession() {
+    usePlayerStore().stop()
+    useSubscriptionStore().reset()
+    user.value = null
+  }
+
   async function logout() {
     await api.post('/api/logout')
-    user.value = null
+    clearSession()
   }
 
   async function logoutAll() {
     await api.post('/api/logout-all')
-    user.value = null
+    clearSession()
   }
 
   async function changePassword(payload) {
     await api.put('/api/password', payload)
-    user.value = null
+    clearSession()
   }
 
   return {
@@ -70,6 +78,7 @@ export const useAuthStore = defineStore('auth', () => {
     logout,
     logoutAll,
     changePassword,
+    clearSession,
   }
 })
 
