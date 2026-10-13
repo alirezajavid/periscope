@@ -8,6 +8,14 @@ use RuntimeException;
 
 abstract class TestCase extends BaseTestCase
 {
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        // Tests send `Referer: http://localhost`; make that a stateful SPA origin whatever .env says.
+        config(['sanctum.stateful' => ['localhost']]);
+    }
+
     /**
      * RefreshDatabase runs migrate:fresh, so refuse to boot against anything
      * that is not a dedicated test database.
