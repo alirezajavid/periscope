@@ -12,9 +12,11 @@ Read this file and `CLAUDE.md` first in every new session.
 - chore/scaffold, feat/auth (email + password, sessions, device-family check), chore/project-conventions — merged.
 - feat/auth-otp-google: phone OTP (driver `log`), Google via Socialite — merged.
 - feat/admin-auth: admin login with mandatory TOTP (Fortify actions), own session cookie `periscope_admin_session`, 30 min idle timeout, admin_logs, `php artisan periscope:make-admin {email}`.
+- feat/admin-auth merged. (Order changed: payments/subscriptions before posts, because `PostPolicy` needs real subscriptions to test both sides.)
+- feat/payments-subscriptions: plans + prices (IRT/USD/USDT), payment methods, manual payments with receipt, approve (admin picks start date) / reject, manual subscriptions, emails.
 
 ## In progress
-- feat/admin-auth (merging)
+- feat/payments-subscriptions (merging)
 
 ## Remaining
 Per the overnight plan: auth (OTP, Google), admin auth (TOTP), posts, payments/subscriptions, watermark, text fingerprint, remaining APIs, `docs/api.md`, app UI, admin UI.
@@ -27,6 +29,9 @@ Per the overnight plan: auth (OTP, Google), admin auth (TOTP), posts, payments/s
 - Admin CSRF: admin and app share the parent cookie domain, so the admin app gets its CSRF token from `GET /api/admin/csrf-token` (JSON) and sends `X-CSRF-TOKEN`, instead of the shared `XSRF-TOKEN` cookie. `@shared/api/client.js` will get an option for this when the admin UI is built.
 - A first-time phone number signs up through `/api/otp/login` with a `name`; the response is 201 in that case.
 - Unverified-email users can log in (the app shows a banner); gating premium content on verified email is for the posts module to decide.
+
+- One pending payment per user at a time (stops queue spam). Plans and payment methods are deactivated, never deleted (payments reference them).
+- Prices in `plan_prices` are placeholders until the owner decides; seeders will use demo prices.
 
 ## Problems
 - CI `api` job failed once because tests depended on `SANCTUM_STATEFUL_DOMAINS` in `.env`; fixed in `TestCase`.

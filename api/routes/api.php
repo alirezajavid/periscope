@@ -14,6 +14,10 @@ use App\Http\Controllers\Api\Auth\SendOtpController;
 use App\Http\Controllers\Api\Auth\StartPhoneVerificationController;
 use App\Http\Controllers\Api\Auth\VerifyEmailController;
 use App\Http\Controllers\Api\Auth\VerifyPhoneController;
+use App\Http\Controllers\Api\PaymentController;
+use App\Http\Controllers\Api\PaymentMethodController;
+use App\Http\Controllers\Api\PlanController;
+use App\Http\Controllers\Api\SubscriptionController;
 use Illuminate\Support\Facades\Route;
 
 Route::post('/register', RegisterController::class)->middleware('throttle:10,1');
@@ -26,7 +30,14 @@ Route::get('/email/verify/{id}/{hash}', VerifyEmailController::class)
     ->middleware(['signed', 'throttle:6,1'])
     ->name('verification.verify');
 
+Route::get('/plans', [PlanController::class, 'index']);
+
 Route::middleware(['auth:sanctum', 'active', 'device'])->group(function () {
+    Route::get('/payment-methods', [PaymentMethodController::class, 'index']);
+    Route::get('/payments', [PaymentController::class, 'index']);
+    Route::post('/payments', [PaymentController::class, 'store'])->middleware('throttle:10,1');
+    Route::get('/subscription', SubscriptionController::class);
+
     Route::get('/user', MeController::class);
     Route::post('/logout', LogoutController::class);
     Route::post('/logout-all', LogoutAllController::class);

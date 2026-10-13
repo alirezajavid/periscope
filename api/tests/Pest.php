@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -16,6 +17,7 @@ use Tests\TestCase;
 
 pest()->extend(TestCase::class)
     ->use(RefreshDatabase::class)
+    ->beforeEach(fn () => $this->withHeader('Referer', 'http://localhost'))
     ->in('Feature');
 
 /*
@@ -44,7 +46,16 @@ expect()->extend('toBeOne', function () {
 |
 */
 
-function something()
+/** A request signed in as a (fully logged-in) admin: password and TOTP steps already passed. */
+function asAdmin(?User $admin = null): TestCase
 {
-    // ..
+    $admin ??= User::factory()->admin()->withTwoFactor()->create();
+
+    return test()->actingAs($admin)->withSession(['admin_two_factor_passed' => true]);
+}
+
+/** A request signed in as a subscriber/user. */
+function asUser(?User $user = null): TestCase
+{
+    return test()->actingAs($user ?? User::factory()->create());
 }
