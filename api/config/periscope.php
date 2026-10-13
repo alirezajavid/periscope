@@ -5,6 +5,9 @@ return [
     'app_url' => env('PERISCOPE_APP_URL', 'http://localhost:9000'),
     'admin_url' => env('PERISCOPE_ADMIN_URL', 'http://localhost:9001'),
 
+    // SMS provider for OTP codes. Only `log` (writes the code to the log) exists for now.
+    'sms' => ['driver' => env('SMS_DRIVER', 'log')],
+
     // Signed URL lifetime for personalized audio, in minutes.
     'audio_url_ttl' => (int) env('PERISCOPE_AUDIO_URL_TTL', 120),
 

@@ -35,10 +35,7 @@ class LoginController extends Controller
             return response()->json(['message' => __('auth.blocked')], 403);
         }
 
-        $request->session()->regenerate();
-        UserSession::start($request, $user);
-        $user->forceFill(['last_login_at' => now()])->save();
-        LoginEvent::record($request, LoginMethod::Email, true, $user);
+        UserSession::signIn($request, $user, LoginMethod::Email);
 
         return new UserResource($user);
     }

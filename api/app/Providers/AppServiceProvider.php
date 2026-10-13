@@ -27,7 +27,7 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         RateLimiter::for('login', fn (Request $request) => Limit::perMinute(5)
-            ->by(Str::lower((string) $request->input('email')).'|'.$request->ip()));
+            ->by(Str::lower((string) ($request->input('email') ?? $request->input('phone'))).'|'.$request->ip()));
 
         // Password-reset and verification emails link to the frontend app.
         ResetPassword::createUrlUsing(fn ($user, string $token) => config('periscope.app_url')
