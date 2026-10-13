@@ -22,6 +22,9 @@ use Mews\Purifier\Facades\Purifier;
  * @property PostAccess $access
  * @property PostStatus $status
  * @property Carbon|null $published_at
+ * @property int|null $started Only present after withCount in the stats query.
+ * @property int|null $completed
+ * @property float|string|null $average_listened
  * @property int|null $watermarks_ready Only present after scopeWithWatermarkCounts().
  * @property int|null $watermarks_building
  * @property int|null $watermarks_failed
@@ -58,6 +61,12 @@ class Post extends Model
     public function tags(): BelongsToMany
     {
         return $this->belongsToMany(Tag::class);
+    }
+
+    /** @return HasMany<PlaybackProgress, $this> */
+    public function progress(): HasMany
+    {
+        return $this->hasMany(PlaybackProgress::class);
     }
 
     /** @return HasMany<PersonalizedFile, $this> */

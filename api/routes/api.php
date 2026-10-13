@@ -14,6 +14,7 @@ use App\Http\Controllers\Api\Auth\SendOtpController;
 use App\Http\Controllers\Api\Auth\StartPhoneVerificationController;
 use App\Http\Controllers\Api\Auth\VerifyEmailController;
 use App\Http\Controllers\Api\Auth\VerifyPhoneController;
+use App\Http\Controllers\Api\ContinueListeningController;
 use App\Http\Controllers\Api\FeedController;
 use App\Http\Controllers\Api\FreeAudioController;
 use App\Http\Controllers\Api\PaymentController;
@@ -22,6 +23,7 @@ use App\Http\Controllers\Api\PlanController;
 use App\Http\Controllers\Api\PlaybackLockController;
 use App\Http\Controllers\Api\PostAudioController;
 use App\Http\Controllers\Api\PostController;
+use App\Http\Controllers\Api\ProgressController;
 use App\Http\Controllers\Api\StreamAudioController;
 use App\Http\Controllers\Api\SubscriptionController;
 use App\Http\Controllers\Api\TagController;
@@ -55,6 +57,9 @@ Route::middleware(['auth:sanctum', 'active', 'device'])->group(function () {
     Route::get('/payments', [PaymentController::class, 'index']);
     Route::post('/payments', [PaymentController::class, 'store'])->middleware('throttle:10,1');
     Route::get('/subscription', SubscriptionController::class);
+    Route::get('/continue', ContinueListeningController::class);
+    Route::get('/posts/{id}/progress', [ProgressController::class, 'show']);
+    Route::put('/posts/{id}/progress', [ProgressController::class, 'update'])->middleware('throttle:120,1');
     Route::post('/playback/heartbeat', [PlaybackLockController::class, 'heartbeat']);
     Route::post('/playback/release', [PlaybackLockController::class, 'release']);
 

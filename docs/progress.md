@@ -20,9 +20,11 @@ Read this file and `CLAUDE.md` first in every new session.
 - feat/watermark-audio: `GeneratePersonalizedAudio` job (ffmpeg → audiowmark → 64 kbps MP3 via `Process`, argument arrays), `periscope:build-watermarks` (hourly, 3 h before publish, recently active listeners first), `periscope:cleanup-watermarks` (7-day keep), signed relative URLs (2 h), `GET /api/posts/{id}/audio?device=` (ready/preparing), one-device playback lock with heartbeat/release, admin watermark counts + failed list + retry.
 - feat/watermark-audio merged.
 - feat/text-fingerprint: invisible per-reader marks (U+200B/U+2060, 32-bit code, one per paragraph/list item/quote) added to premium bodies at response time; `TextFingerprint::identify()`; admin leak checks for text and audio (`audiowmark get`) with history in `leak_checks`.
+- feat/text-fingerprint merged.
+- feat/playback-progress: `PUT /api/posts/{id}/progress` (position + device; doubles as lock heartbeat), `GET /api/continue`, admin listening stats (started, completed ≥ 90 %, completion %, average time).
 
 ## In progress
-- feat/text-fingerprint (merging)
+- feat/playback-progress (merging)
 
 ## Remaining
 Per the overnight plan: auth (OTP, Google), admin auth (TOTP), posts, payments/subscriptions, watermark, text fingerprint, remaining APIs, `docs/api.md`, app UI, admin UI.
