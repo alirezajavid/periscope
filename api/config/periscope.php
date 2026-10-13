@@ -1,6 +1,10 @@
 <?php
 
 return [
+    // Frontend origins; used in emails (verification, password reset) and CORS.
+    'app_url' => env('PERISCOPE_APP_URL', 'http://localhost:9000'),
+    'admin_url' => env('PERISCOPE_ADMIN_URL', 'http://localhost:9001'),
+
     // Signed URL lifetime for personalized audio, in minutes.
     'audio_url_ttl' => (int) env('PERISCOPE_AUDIO_URL_TTL', 120),
 

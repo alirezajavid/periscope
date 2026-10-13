@@ -1,8 +1,29 @@
 <?php
 
-use Illuminate\Http\Request;
+use App\Http\Controllers\Api\Auth\ChangePasswordController;
+use App\Http\Controllers\Api\Auth\ForgotPasswordController;
+use App\Http\Controllers\Api\Auth\LoginController;
+use App\Http\Controllers\Api\Auth\LogoutAllController;
+use App\Http\Controllers\Api\Auth\LogoutController;
+use App\Http\Controllers\Api\Auth\MeController;
+use App\Http\Controllers\Api\Auth\RegisterController;
+use App\Http\Controllers\Api\Auth\ResendVerificationController;
+use App\Http\Controllers\Api\Auth\ResetPasswordController;
+use App\Http\Controllers\Api\Auth\VerifyEmailController;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/user', function (Request $request) {
-    return $request->user();
-})->middleware('auth:sanctum');
+Route::post('/register', RegisterController::class)->middleware('throttle:10,1');
+Route::post('/login', LoginController::class)->middleware('throttle:login');
+Route::post('/forgot-password', ForgotPasswordController::class)->middleware('throttle:5,1');
+Route::post('/reset-password', ResetPasswordController::class)->middleware('throttle:5,1');
+Route::get('/email/verify/{id}/{hash}', VerifyEmailController::class)
+    ->middleware(['signed', 'throttle:6,1'])
+    ->name('verification.verify');
+
+Route::middleware(['auth:sanctum', 'active', 'device'])->group(function () {
+    Route::get('/user', MeController::class);
+    Route::post('/logout', LogoutController::class);
+    Route::post('/logout-all', LogoutAllController::class);
+    Route::put('/password', ChangePasswordController::class);
+    Route::post('/email/resend', ResendVerificationController::class)->middleware('throttle:3,1');
+});

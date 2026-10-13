@@ -2,21 +2,38 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
+use App\Enums\MirrorServer;
+use App\Enums\UserRole;
+use App\Enums\UserStatus;
 use Database\Factories\UserFactory;
+use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 
-#[Fillable(['name', 'email', 'password'])]
-#[Hidden(['password', 'remember_token'])]
-class User extends Authenticatable
+/**
+ * @property UserRole $role
+ * @property UserStatus $status
+ * @property MirrorServer $preferred_mirror
+ */
+#[Fillable(['name', 'email', 'phone', 'password', 'notify_new_episode', 'preferred_mirror'])]
+#[Hidden(['password', 'remember_token', 'watermark_payload'])]
+class User extends Authenticatable implements MustVerifyEmail
 {
     /** @use HasFactory<UserFactory> */
     use HasApiTokens, HasFactory, Notifiable;
+
+    protected static function booted(): void
+    {
+        // 128-bit identifier embedded in this user's audio watermark.
+        static::creating(function (User $user) {
+            $user->watermark_payload ??= bin2hex(random_bytes(16));
+        });
+    }
 
     /**
      * Get the attributes that should be cast.
@@ -27,7 +44,24 @@ class User extends Authenticatable
     {
         return [
             'email_verified_at' => 'datetime',
+            'phone_verified_at' => 'datetime',
+            'last_login_at' => 'datetime',
             'password' => 'hashed',
+            'notify_new_episode' => 'boolean',
+            'role' => UserRole::class,
+            'status' => UserStatus::class,
+            'preferred_mirror' => MirrorServer::class,
         ];
+    }
+
+    /** @return HasMany<UserSession, $this> */
+    public function sessions(): HasMany
+    {
+        return $this->hasMany(UserSession::class);
+    }
+
+    public function isBlocked(): bool
+    {
+        return $this->status === UserStatus::Blocked;
     }
 }
