@@ -57,6 +57,28 @@ body {
   -webkit-tap-highlight-color: transparent;
 }
 
+// No zoom: iOS ignores `user-scalable=no`, so block pinch-zoom here and double-tap zoom on controls.
+html,
+body {
+  touch-action: pan-x pan-y;
+}
+
+a,
+button,
+.q-btn,
+.q-slider {
+  touch-action: manipulation;
+}
+
+// iOS zooms into any focused field whose font is smaller than 16px.
+input,
+select,
+textarea,
+.q-field__native,
+.q-field__input {
+  font-size: 16px;
+}
+
 // Quasar's default headings are huge (h1: 6rem line-height); this app sets sizes itself.
 h1,
 h2,
