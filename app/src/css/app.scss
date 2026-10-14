@@ -1,6 +1,30 @@
 // Global styles. Colors come from quasar.variables.scss (docs/design palette).
-// The IRANSans font files are not in the repo yet; until they are added the stack falls back to Tahoma.
-// To add them: put woff2 files in src/assets/fonts and declare @font-face here.
+
+// B Yekan+ (regular and bold), the UI font of both apps. Files: src/assets/fonts.
+@font-face {
+  font-family: 'BYekan';
+  src: url('../assets/fonts/byekan-regular.woff') format('woff');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'BYekan';
+  src: url('../assets/fonts/byekan-bold.woff') format('woff');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+// Form controls and the editor don't inherit the page font by default.
+button,
+input,
+select,
+textarea,
+.q-editor__content {
+  font-family: inherit;
+}
 
 :root {
   --page: #{$page};
