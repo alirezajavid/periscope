@@ -26,10 +26,11 @@ function deviceId() {
   return id
 }
 
-// One <audio> element for the whole app, so playback survives page changes.
+// One <audio> element for the whole app, so playback survives page changes and screen lock.
+// Background tabs throttle or freeze setTimeout/setInterval (iOS especially), so the sleep timer and
+// progress reports run from the element's own `timeupdate` events, which keep firing while audio plays.
 let audio = null
-let reportTimer = null
-let sleepTimer = null
+let lastReportAt = 0
 
 export const usePlayerStore = defineStore('player', () => {
   const current = ref(null) // { id, title, cover_url, access }
@@ -51,6 +52,15 @@ export const usePlayerStore = defineStore('player', () => {
     audio.preload = 'auto'
     audio.addEventListener('timeupdate', () => {
       position.value = audio.currentTime
+      if (sleepEndsAt.value && Date.now() >= sleepEndsAt.value) {
+        sleepEndsAt.value = null
+        audio.pause()
+        return
+      }
+      if (Date.now() - lastReportAt >= REPORT_EVERY_MS) {
+        lastReportAt = Date.now()
+        report()
+      }
       if (current.value && Math.floor(audio.currentTime) % 5 === 0) {
         localStorage.setItem(
           `periscope.position.${current.value.id}`,
@@ -60,20 +70,27 @@ export const usePlayerStore = defineStore('player', () => {
     })
     audio.addEventListener('loadedmetadata', () => {
       if (Number.isFinite(audio.duration)) duration.value = Math.floor(audio.duration)
+      updatePositionState()
     })
+    audio.addEventListener('ratechange', updatePositionState)
+    audio.addEventListener('seeked', updatePositionState)
     audio.addEventListener('play', () => {
+      // A sleep timer that ran out while paused must not stop the next play.
+      if (sleepEndsAt.value && Date.now() >= sleepEndsAt.value) sleepEndsAt.value = null
       status.value = 'playing'
-      startReporting()
+      lastReportAt = Date.now()
+      report()
       updateMediaSession()
     })
     audio.addEventListener('pause', () => {
       if (!audio.ended && status.value === 'playing') status.value = 'paused'
-      stopReporting()
+      setPlaybackState('paused')
+      releaseDevice()
     })
     audio.addEventListener('ended', () => {
       status.value = 'paused'
-      stopReporting()
-      report()
+      setPlaybackState('paused')
+      releaseDevice()
     })
     audio.addEventListener('error', () => {
       if (status.value === 'loading' || status.value === 'playing') fail('network')
@@ -84,7 +101,6 @@ export const usePlayerStore = defineStore('player', () => {
   function fail(code) {
     error.value = code
     status.value = 'error'
-    stopReporting()
   }
 
   /** Ask the API where to stream from; waits while the personalized copy is being built. */
@@ -201,16 +217,9 @@ export const usePlayerStore = defineStore('player', () => {
     if (audio) audio.playbackRate = value
   }
 
-  /** Pause after `minutes`; null turns the timer off. */
+  /** Pause after `minutes` (checked on every `timeupdate`); null turns the timer off. */
   function setSleep(minutes) {
-    clearTimeout(sleepTimer)
-    sleepEndsAt.value = null
-    if (!minutes) return
-    sleepEndsAt.value = Date.now() + minutes * 60000
-    sleepTimer = setTimeout(() => {
-      element().pause()
-      sleepEndsAt.value = null
-    }, minutes * 60000)
+    sleepEndsAt.value = minutes ? Date.now() + minutes * 60000 : null
   }
 
   /** Report the position; the same call keeps the one-device lock alive. */
@@ -229,23 +238,22 @@ export const usePlayerStore = defineStore('player', () => {
     }
   }
 
-  function startReporting() {
-    stopReporting()
-    report()
-    reportTimer = setInterval(report, REPORT_EVERY_MS)
-  }
-
-  async function stopReporting() {
-    clearInterval(reportTimer)
-    reportTimer = null
+  /** Save the position and free the one-device lock once playback stops. */
+  async function releaseDevice() {
     if (!audio?.paused) return
     await report()
     api.post('/api/playback/release', { device: deviceId() }).catch(() => {})
   }
 
+  // The OS may suspend a hidden page without warning: save the position when it goes to the background.
+  if (typeof document !== 'undefined') {
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'hidden') report()
+    })
+  }
+
   /** Unload everything (on logout). */
   function stop() {
-    stopReporting()
     setSleep(null)
     if (audio) {
       audio.pause()
@@ -281,6 +289,28 @@ export const usePlayerStore = defineStore('player', () => {
       artist: 'پادکست پریسکوپ',
       artwork: current.value.cover_url ? [{ src: current.value.cover_url, sizes: '512x512' }] : [],
     })
+    setPlaybackState('playing')
+    updatePositionState()
+  }
+
+  function setPlaybackState(state) {
+    if ('mediaSession' in navigator) navigator.mediaSession.playbackState = state
+  }
+
+  /** Progress bar on the lock screen / notification. */
+  function updatePositionState() {
+    if (!('mediaSession' in navigator) || !navigator.mediaSession.setPositionState || !audio) return
+    const total = Number.isFinite(audio.duration) ? audio.duration : duration.value
+    if (!total) return
+    try {
+      navigator.mediaSession.setPositionState({
+        duration: total,
+        playbackRate: audio.playbackRate,
+        position: Math.min(audio.currentTime, total),
+      })
+    } catch {
+      // Some browsers reject the call while metadata is still loading.
+    }
   }
 
   return {
