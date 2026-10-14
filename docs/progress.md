@@ -5,7 +5,8 @@ Read this file and `CLAUDE.md` first in every new session.
 ## Environment notes
 - Local ports: API `8001` (port 8000 is taken by another local project, Apache), app `9000`, admin `9001`.
 - Run: `cd api && php artisan serve --host=localhost --port=8001`, `php artisan queue:work redis`; `cd app && npx quasar dev -m pwa -p 9000`; `cd admin && npx quasar dev -p 9001`.
-- Prerequisites found missing: `audiowmark` (watermark tests use `Process::fake()`), IRANSans font file (fallback Tahoma).
+- Prerequisites found missing: `audiowmark` (watermark tests use `Process::fake()`).
+- UI font: B Yekan+ (`BYekan`, 400/700) added to both apps on 1405-07-22, replacing the IRANSans plan.
 - Inputs (zip files) are kept outside the repo in `/home/douran/Projects/periscope-inputs`; the prototype PNGs are in `docs/design/`.
 
 ## Done
@@ -40,7 +41,6 @@ Read this file and `CLAUDE.md` first in every new session.
 
 ## Remaining (needs the owner or a real environment)
 - Real SMS provider (driver is `log`; OTP codes are in `api/storage/logs/laravel.log`).
-- IRANSans font file (Tahoma fallback until it is added to `app/` and `admin/`).
 - Real plan prices (seed prices are placeholders) and the payment texts from the owner.
 - Install `audiowmark` and run the real-episode test from reference.md §11 (time and audio quality); the audio leak check also needs it.
 - Copy a marked paragraph into Telegram and back to confirm the invisible marks survive.
@@ -100,7 +100,7 @@ cd admin && API_URL=http://localhost:8001 npx quasar dev -p 9001
 - OTP codes are written to `api/storage/logs/laravel.log` (`SMS_DRIVER=log`); emails too (`MAIL_MAILER=log`).
 - Visual checks: Playwright (`playwright-core` in `/tmp/pw`, outside the repo) driving the installed Chrome at 390 px, compared with `docs/design/`.
 - UI differences from the prototype (deliberate): header back arrow sits at the reading start (right) next to the title; "edit email" opens an inline form (needs `PUT /api/email`); the prototype's "simulation: click the email link" boxes are not built; the password rule is "upper- and lower-case Latin letters" (what the API enforces) instead of "an upper-case letter".
-- Quasar here has no `build.rtl`; RTL is `direction: rtl` in CSS (see `docs/frontend.md`). The IRANSans font file is not in the repo: Tahoma is the fallback until it is added.
+- Quasar here has no `build.rtl`; RTL is `direction: rtl` in CSS (see `docs/frontend.md`).
 
 - Package note: `workbox-range-requests` was added to `app/src-pwa/package.json` (it was already installed as a Workbox dependency). reference.md §5 names Workbox + RangeRequestsPlugin explicitly; the SW uses its `createPartialResponse` directly because the cache lookup ignores the signed query string.
 - The app remembers the last signed-in user in localStorage (`periscope.user`) only to keep stored episodes reachable offline within the 7-day grace period; it is removed on logout.

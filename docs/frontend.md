@@ -21,7 +21,7 @@ src/
 - **RTL:** this Quasar version has no `build.rtl` and its CSS hard-codes `direction: ltr`, so `app.scss` sets `direction: rtl` on `html, body, #q-app` (and `<html lang="fa" dir="rtl">` in `index.html`). Use logical CSS properties (`inline-start`, `margin-inline`, …) in custom styles.
 - **Messages (vue-i18n):** `@` starts a linked message — write a literal one as `{'@'}`.
 
-- **Font:** IRANSans in both apps (`src/assets/fonts`, `@font-face` in `app.scss`); fallback `Tahoma, sans-serif`.
+- **Font:** B Yekan+ (`'BYekan'`, regular 400 and bold 700) in both apps — files in `src/assets/fonts`, `@font-face` in `app.scss`, family in `$typography-font-family`; fallback `Tahoma, sans-serif`. Don't set another `font-family` anywhere (use `inherit`). The Roboto extra is removed.
 - **app/** follows the prototype images in `docs/design/` (390px-wide mobile frames). **admin/** uses plain, standard Quasar (QLayout + QDrawer, QHeader, QTable, QForm, default colors) — Persian and RTL, no custom design.
 - Page → Pinia setup store → `@shared/api/client.js`: pages never call axios directly. Loading / empty / error states use shared components.
 

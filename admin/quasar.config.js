@@ -26,7 +26,6 @@ export default defineConfig((ctx) => {
       // 'themify',
       // 'line-awesome',
 
-      'roboto-font', // optional, you are not bound to it
       'material-icons', // optional, you are not bound to it
     ],
 
