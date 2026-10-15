@@ -109,8 +109,7 @@ const routes = [
       {
         path: 'install',
         name: 'install',
-        meta: { setting: 'page_install_guide', titleKey: 'account.installGuide' },
-        component: () => import('@/pages/StaticPage.vue'),
+        component: () => import('@/pages/InstallPage.vue'),
       },
     ],
   },
