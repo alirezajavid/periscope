@@ -24,7 +24,7 @@ class PostController extends Controller
 
     public function show(Request $request, int $id): PostResource
     {
-        return new PostResource(Post::visible()->with('tags')->findOrFail($id));
+        return new PostResource(Post::visible()->with('tags')->withReactions($request->user())->findOrFail($id));
     }
 
     /**

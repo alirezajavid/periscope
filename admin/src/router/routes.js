@@ -16,6 +16,7 @@ const routes = [
         name: 'questions',
         component: () => import('@/pages/QuestionsPage.vue'),
       },
+      { path: 'comments', name: 'comments', component: () => import('@/pages/CommentsPage.vue') },
       { path: 'stats', name: 'stats', component: () => import('@/pages/StatsPage.vue') },
       { path: 'leaks', name: 'leaks', component: () => import('@/pages/LeaksPage.vue') },
       { path: 'settings', name: 'settings', component: () => import('@/pages/SettingsPage.vue') },

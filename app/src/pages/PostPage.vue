@@ -82,6 +82,17 @@
             >#{{ tag }}</router-link
           >
         </div>
+
+        <!-- Only readers of the content can react and comment (the API enforces the same) -->
+        <template v-if="!post.locked">
+          <ReactionBar
+            class="post-reactions"
+            :value="post.reactions"
+            :react="(type) => comments.reactToPost(post.id, type)"
+            @update="post.reactions = $event"
+          />
+          <CommentsSection :post-id="post.id" />
+        </template>
       </template>
     </StatusPanel>
   </q-page>
@@ -91,9 +102,12 @@
 import { computed, onMounted, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { useI18n } from 'vue-i18n'
+import CommentsSection from '@/components/comments/CommentsSection.vue'
+import ReactionBar from '@/components/comments/ReactionBar.vue'
 import CoverImage from '@/components/CoverImage.vue'
 import PageHeader from '@/components/PageHeader.vue'
 import StatusPanel from '@/components/StatusPanel.vue'
+import { useCommentsStore } from '@/stores/useCommentsStore'
 import { usePlayerStore } from '@/stores/usePlayerStore'
 import { usePostsStore } from '@/stores/usePostsStore'
 import { formatDate } from '@shared/utils/date.js'
@@ -103,6 +117,7 @@ const route = useRoute()
 const { t } = useI18n()
 const posts = usePostsStore()
 const player = usePlayerStore()
+const comments = useCommentsStore()
 const post = ref(null)
 const loading = ref(true)
 const error = ref('')
@@ -233,5 +248,9 @@ watch(() => route.params.id, load)
 .tag {
   color: var(--primary);
   text-decoration: none;
+}
+
+.post-reactions {
+  margin-top: 20px;
 }
 </style>
