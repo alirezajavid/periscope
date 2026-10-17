@@ -22,7 +22,7 @@ export const useAdminUsersStore = defineStore('adminUsers', () => {
     sendPasswordLink,
     verifyEmail,
     setPassword,
-    
+    block,
     unblock,
     logoutAll,
     grantSubscription,

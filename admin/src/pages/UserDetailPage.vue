@@ -24,7 +24,9 @@
                 <q-item-section v-if="user.email" side>
                   <q-badge
                     :color="user.email_verified_at ? 'positive' : 'warning'"
-                    :label="$t(`users.detail.${user.email_verified_at ? 'verified' : 'unverified'}`)"
+                    :label="
+                      $t(`users.detail.${user.email_verified_at ? 'verified' : 'unverified'}`)
+                    "
                   />
                 </q-item-section>
               </q-item>
