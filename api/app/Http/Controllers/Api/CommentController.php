@@ -7,6 +7,7 @@ use App\Http\Requests\Api\StoreCommentRequest;
 use App\Http\Resources\CommentResource;
 use App\Models\Comment;
 use App\Models\Post;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Http\Response;
@@ -35,7 +36,7 @@ class CommentController extends Controller
         return CommentResource::collection($comments);
     }
 
-    public function store(StoreCommentRequest $request, int $id): Response
+    public function store(StoreCommentRequest $request, int $id): JsonResponse
     {
         $parent = $request->parentComment();
 
