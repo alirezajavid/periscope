@@ -21,13 +21,20 @@ use Illuminate\Validation\ValidationException;
 
 class PostController extends Controller
 {
+    /** Columns the post list can be sorted by (?sort=…&descending=1); counts come from withCount. */
+    private const SORTABLE = ['id', 'episode_number', 'title', 'access', 'status', 'published_at', 'likes_count', 'dislikes_count', 'comments_count'];
+
     public function index(Request $request): AnonymousResourceCollection
     {
-        $posts = Post::with('tags')->withWatermarkCounts()
+        $sort = $request->string('sort')->value();
+        $sort = in_array($sort, self::SORTABLE, true) ? $sort : 'id';
+
+        $posts = Post::with('tags')->withWatermarkCounts()->withReactionCounts()->withCount('comments')
             ->when($request->boolean('trashed'), fn ($q) => $q->onlyTrashed())
             ->when($request->string('q')->trim()->value(), fn ($q, $term) => $q->where('title', 'like', '%'.addcslashes($term, '%_\\').'%'))
             ->when($request->enum('status', PostStatus::class), fn ($q, $status) => $q->where('status', $status))
             ->when($request->enum('access', PostAccess::class), fn ($q, $access) => $q->where('access', $access))
+            ->orderBy($sort, $request->boolean('descending', $sort === 'id') ? 'desc' : 'asc')
             ->latest('id')
             ->paginate(20);
 

@@ -40,14 +40,30 @@ trait HasReactions
      */
     public function scopeWithReactions(Builder $query, ?User $reader): void
     {
-        $query->withCount([
-            'reactions as likes_count' => fn ($q) => $q->where('type', ReactionType::Like),
-            'reactions as dislikes_count' => fn ($q) => $q->where('type', ReactionType::Dislike),
-        ]);
+        $query->withCount(self::reactionCountColumns());
 
         $reader
             ? $query->with(['myReaction' => fn ($q) => $q->where('user_id', $reader->id)])
             : $query->with(['myReaction' => fn ($q) => $q->whereRaw('1 = 0')]);
+    }
+
+    /**
+     * Adds likes_count and dislikes_count only (admin lists).
+     *
+     * @param  Builder<static>  $query
+     */
+    public function scopeWithReactionCounts(Builder $query): void
+    {
+        $query->withCount(self::reactionCountColumns());
+    }
+
+    /** @return array<string, \Closure> */
+    private static function reactionCountColumns(): array
+    {
+        return [
+            'reactions as likes_count' => fn ($q) => $q->where('type', ReactionType::Like),
+            'reactions as dislikes_count' => fn ($q) => $q->where('type', ReactionType::Dislike),
+        ];
     }
 
     /** Set, change or (with null) remove the user's reaction. */

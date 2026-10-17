@@ -35,6 +35,11 @@ class AdminPostResource extends JsonResource
                 'building' => (int) $this->watermarks_building,
                 'failed' => (int) $this->watermarks_failed,
             ]),
+            'feedback' => $this->when(isset($this->likes_count), fn () => [
+                'likes' => (int) $this->likes_count,
+                'dislikes' => (int) $this->dislikes_count,
+                'comments' => (int) $this->comments_count,
+            ]),
             'tags' => $this->whenLoaded('tags', fn () => $this->tags->pluck('name')),
             'created_by' => $this->created_by,
             'created_at' => $this->created_at,

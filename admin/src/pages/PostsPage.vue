@@ -192,7 +192,13 @@ const rows = ref([])
 const loading = ref(false)
 const error = ref('')
 const filters = reactive({ q: '', status: null, access: null, trashed: false })
-const pagination = ref({ page: 1, rowsPerPage: 20, rowsNumber: 0 })
+const pagination = ref({
+  page: 1,
+  rowsPerPage: 20,
+  rowsNumber: 0,
+  sortBy: 'id',
+  descending: true,
+})
 let timer = null
 
 const statusOptions = computed(() =>
@@ -202,18 +208,46 @@ const accessOptions = computed(() =>
   ['free', 'premium'].map((value) => ({ value, label: t(`posts.accessValue.${value}`) })),
 )
 
+// Sorting happens on the server (the list is paginated), so `name` is the API's sort key.
+const countColumn = (name, key, label) => ({
+  name,
+  label,
+  field: (row) => row.feedback?.[key] ?? 0,
+  align: 'right',
+  sortable: true,
+  format: (v) => formatNumber(v),
+})
 const columns = computed(() => [
-  { name: 'id', label: '#', field: 'id', align: 'right', format: (v) => formatNumber(v) },
+  {
+    name: 'id',
+    label: '#',
+    field: 'id',
+    align: 'right',
+    sortable: true,
+    format: (v) => formatNumber(v),
+  },
+  {
+    name: 'episode_number',
+    label: t('posts.episodeNumber'),
+    field: 'episode_number',
+    align: 'right',
+    sortable: true,
+    format: (v) => (v == null ? '—' : formatNumber(v)),
+  },
   {
     name: 'title',
     label: t('posts.titleField'),
     field: 'title',
     align: 'right',
+    sortable: true,
     format: (v) => toPersianDigits(v),
   },
-  { name: 'access', label: t('posts.access'), align: 'right' },
-  { name: 'status', label: t('posts.status'), align: 'right' },
-  { name: 'published_at', label: t('posts.publishedAt'), align: 'right' },
+  { name: 'access', label: t('posts.access'), align: 'right', sortable: true },
+  { name: 'status', label: t('posts.status'), align: 'right', sortable: true },
+  { name: 'published_at', label: t('posts.publishedAt'), align: 'right', sortable: true },
+  countColumn('likes_count', 'likes', t('posts.likes')),
+  countColumn('dislikes_count', 'dislikes', t('posts.dislikes')),
+  countColumn('comments_count', 'comments', t('posts.comments')),
   { name: 'watermarks', label: t('posts.watermark'), align: 'right' },
   { name: 'actions', label: '', align: 'left' },
 ])
@@ -228,6 +262,8 @@ async function load(page = 1) {
       status: filters.status || undefined,
       access: filters.access || undefined,
       trashed: filters.trashed ? 1 : undefined,
+      sort: pagination.value.sortBy || undefined,
+      descending: pagination.value.descending ? 1 : 0,
     }
     const data = await posts.list(params)
     rows.value = data.data
@@ -248,7 +284,10 @@ const reloadSoon = () => {
   clearTimeout(timer)
   timer = setTimeout(reload, 350)
 }
-const onRequest = ({ pagination: p }) => load(p.page)
+const onRequest = ({ pagination: p }) => {
+  pagination.value = { ...pagination.value, sortBy: p.sortBy, descending: p.descending }
+  load(p.page)
+}
 
 async function askDelete(post) {
   const ok = await confirm({
