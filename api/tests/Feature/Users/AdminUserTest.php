@@ -8,6 +8,7 @@ use App\Models\Subscription;
 use App\Models\User;
 use App\Models\UserSession;
 use App\Notifications\AccountCreated;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Notification;
 
 it('keeps non-admins out', function () {
@@ -141,4 +142,50 @@ it('can resend the set-password link', function () {
     asAdmin()->postJson("/api/admin/users/{$user->id}/send-password-link")->assertOk();
 
     Notification::assertSentTo($user, AccountCreated::class);
+});
+
+it('verifies a user email without the confirmation email', function () {
+    $user = User::factory()->unverified()->create();
+
+    asAdmin()->postJson("/api/admin/users/{$user->id}/verify-email")->assertOk()
+        ->assertJsonPath('data.email_verified_at', fn ($value) => $value !== null);
+
+    expect($user->fresh()->email_verified_at)->not->toBeNull()
+        ->and(AdminLog::where('action', 'user.verify_email')->count())->toBe(1);
+});
+
+it('refuses to verify an email that does not exist', function () {
+    $user = User::factory()->create(['email' => null, 'phone' => '+989121234567']);
+
+    asAdmin()->postJson("/api/admin/users/{$user->id}/verify-email")->assertStatus(422);
+});
+
+it('sets a user password and ends all their sessions', function () {
+    $user = User::factory()->create(['password' => null]);
+    UserSession::create(['user_id' => $user->id, 'session_id' => 's1', 'browser_family' => 'Chrome', 'os_family' => 'Windows', 'last_activity_at' => now()]);
+
+    asAdmin()->putJson("/api/admin/users/{$user->id}/password", ['password' => 'NewPass1234'])->assertOk();
+
+    expect(Hash::check('NewPass1234', $user->fresh()->password))->toBeTrue()
+        ->and($user->sessions()->count())->toBe(0)
+        ->and(AdminLog::where('action', 'user.set_password')->count())->toBe(1)
+        ->and(json_encode(AdminLog::where('action', 'user.set_password')->first()->details))->not->toContain('NewPass1234');
+});
+
+it('does not set a password for an admin, a user without email, or a too-short password', function () {
+    $admin = User::factory()->admin()->create();
+    $phoneOnly = User::factory()->create(['email' => null, 'phone' => '+989121234567']);
+    $user = User::factory()->create();
+
+    asAdmin()->putJson("/api/admin/users/{$admin->id}/password", ['password' => 'NewPass1234'])->assertStatus(422);
+    asAdmin()->putJson("/api/admin/users/{$phoneOnly->id}/password", ['password' => 'NewPass1234'])->assertStatus(422);
+    asAdmin()->putJson("/api/admin/users/{$user->id}/password", ['password' => '123'])->assertJsonValidationErrors('password');
+});
+
+it('keeps non-admins away from verifying emails and setting passwords', function () {
+    $user = User::factory()->unverified()->create();
+
+    asUser()->postJson("/api/admin/users/{$user->id}/verify-email")->assertForbidden();
+    asUser()->putJson("/api/admin/users/{$user->id}/password", ['password' => 'NewPass1234'])->assertForbidden();
+    expect($user->fresh()->email_verified_at)->toBeNull();
 });

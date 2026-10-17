@@ -72,5 +72,7 @@ Route::middleware(['auth:sanctum', 'admin.idle', 'admin'])->group(function () {
     Route::post('/users/{user}/unblock', [UserController::class, 'unblock']);
     Route::post('/users/{user}/logout-all', [UserController::class, 'logoutAll']);
     Route::post('/users/{user}/send-password-link', [UserController::class, 'sendPasswordLink']);
+    Route::post('/users/{user}/verify-email', [UserController::class, 'verifyEmail']);
+    Route::put('/users/{user}/password', [UserController::class, 'setPassword']);
     Route::post('/users/{user}/subscriptions', [UserSubscriptionController::class, 'store']);
 });

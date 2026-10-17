@@ -21,6 +21,12 @@
               <q-item>
                 <q-item-section>{{ $t('users.email') }}</q-item-section>
                 <q-item-section side class="ltr">{{ user.email || '—' }}</q-item-section>
+                <q-item-section v-if="user.email" side>
+                  <q-badge
+                    :color="user.email_verified_at ? 'positive' : 'warning'"
+                    :label="$t(`users.detail.${user.email_verified_at ? 'verified' : 'unverified'}`)"
+                  />
+                </q-item-section>
               </q-item>
               <q-item>
                 <q-item-section>{{ $t('users.phone') }}</q-item-section>
@@ -100,6 +106,24 @@
               icon="mail"
               :label="$t('users.detail.sendLink')"
               @click="sendLink"
+            />
+            <q-btn
+              v-if="user.email && !user.email_verified_at"
+              color="primary"
+              outline
+              no-caps
+              icon="mark_email_read"
+              :label="$t('users.detail.verifyEmail')"
+              @click="verifyEmail"
+            />
+            <q-btn
+              v-if="user.email && user.role !== 'admin'"
+              color="primary"
+              outline
+              no-caps
+              icon="password"
+              :label="$t('users.detail.setPassword')"
+              @click="openPassword"
             />
             <q-btn
               color="primary"
@@ -207,6 +231,55 @@
         </q-form>
       </q-card>
     </q-dialog>
+
+    <q-dialog v-model="passwordOpen">
+      <q-card class="dialog-card">
+        <q-form @submit.prevent="savePassword">
+          <q-card-section class="text-h6">{{ $t('users.detail.setPassword') }}</q-card-section>
+          <q-card-section class="q-gutter-md">
+            <q-banner
+              v-if="passwordForm.message.value"
+              class="bg-negative text-white"
+              rounded
+              dense
+              >{{ passwordForm.message.value }}</q-banner
+            >
+            <q-input
+              v-model="newPassword"
+              outlined
+              autofocus
+              class="ltr"
+              autocomplete="new-password"
+              :type="showPassword ? 'text' : 'password'"
+              :label="$t('users.detail.newPassword')"
+              :hint="$t('users.detail.passwordHint')"
+              :error="!!passwordForm.errors.password"
+              :error-message="passwordForm.errors.password"
+            >
+              <template #append>
+                <q-icon
+                  :name="showPassword ? 'visibility_off' : 'visibility'"
+                  class="cursor-pointer"
+                  :aria-label="$t('users.detail.showPassword')"
+                  @click="showPassword = !showPassword"
+                />
+              </template>
+            </q-input>
+          </q-card-section>
+          <q-card-actions align="left">
+            <q-btn
+              type="submit"
+              color="primary"
+              unelevated
+              no-caps
+              :label="$t('common.save')"
+              :loading="passwordForm.loading.value"
+            />
+            <q-btn flat no-caps :label="$t('common.cancel')" @click="passwordOpen = false" />
+          </q-card-actions>
+        </q-form>
+      </q-card>
+    </q-dialog>
   </q-page>
 </template>
 
@@ -230,10 +303,14 @@ const users = useAdminUsersStore()
 const paymentsStore = useAdminPaymentsStore()
 const confirm = useConfirm()
 const form = useApiForm()
+const passwordForm = useApiForm()
 
 const user = ref(null)
 const plans = ref([])
 const grantOpen = ref(false)
+const passwordOpen = ref(false)
+const newPassword = ref('')
+const showPassword = ref(false)
 const draft = reactive({ plan_id: null, starts_at: '', note: '' })
 
 const {
@@ -317,6 +394,22 @@ const toggleBlock = () =>
   user.value.status === 'active' ? act('block', users.block) : act('unblock', users.unblock)
 const logoutAll = () => act('logoutAll', users.logoutAll)
 const sendLink = () => act('sendLink', users.sendPasswordLink)
+const verifyEmail = () => act('verifyEmail', users.verifyEmail)
+
+function openPassword() {
+  newPassword.value = ''
+  showPassword.value = false
+  passwordOpen.value = true
+}
+
+async function savePassword() {
+  const ok = await passwordForm.submit(() => users.setPassword(user.value.id, newPassword.value))
+  if (!ok) return
+  passwordOpen.value = false
+  newPassword.value = ''
+  Notify.create({ type: 'positive', message: t('users.passwordSet') })
+  await load()
+}
 
 async function grant() {
   const ok = await form.submit(() =>
