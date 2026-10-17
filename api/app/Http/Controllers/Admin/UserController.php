@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Enums\UserRole;
 use App\Enums\UserStatus;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Admin\SetUserPasswordRequest;
 use App\Http\Requests\Admin\StoreUserRequest;
 use App\Http\Resources\AdminUserResource;
 use App\Models\AdminLog;
@@ -75,6 +76,35 @@ class UserController extends Controller
         AdminLog::record('user.send_password_link', $user);
 
         return response()->json(['message' => __('users.link_sent')]);
+    }
+
+    /** Mark the email as verified without the confirmation email (e.g. the admin knows the person). */
+    public function verifyEmail(User $user): AdminUserResource
+    {
+        abort_if($user->email === null, 422, __('users.no_email'));
+
+        if ($user->email_verified_at === null) {
+            $user->forceFill(['email_verified_at' => now()])->save();
+            AdminLog::record('user.verify_email', $user);
+        }
+
+        return new AdminUserResource($user);
+    }
+
+    /**
+     * Set a password the admin passes on to the person. Same effect as a password change:
+     * every session of the user ends. Admin accounts manage their own password.
+     */
+    public function setPassword(SetUserPasswordRequest $request, User $user): JsonResponse
+    {
+        abort_if($user->role === UserRole::Admin, 422, __('users.cannot_set_admin_password'));
+        abort_if($user->email === null, 422, __('users.no_email'));
+
+        $user->forceFill(['password' => $request->validated('password')])->save();
+        UserSession::destroyFor($user);
+        AdminLog::record('user.set_password', $user);
+
+        return response()->json(['message' => __('users.password_set')]);
     }
 
     public function block(Request $request, User $user): AdminUserResource
