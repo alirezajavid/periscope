@@ -1,7 +1,9 @@
 <?php
 
+use App\Enums\ReactionType;
 use App\Jobs\MirrorFileToForeignHost;
 use App\Models\AdminLog;
+use App\Models\Comment;
 use App\Models\Post;
 use App\Models\Tag;
 use App\Models\User;
@@ -185,4 +187,28 @@ it('lists hashtags for the editor', function () {
     Tag::create(['name' => 'A']);
 
     asAdmin()->getJson('/api/admin/tags')->assertOk()->assertExactJson(['data' => ['A', 'B']]);
+});
+
+it('lists likes, dislikes and comments per post', function () {
+    $post = Post::factory()->free()->create();
+    $post->react(User::factory()->create(), ReactionType::Like);
+    $post->react(User::factory()->create(), ReactionType::Like);
+    $post->react(User::factory()->create(), ReactionType::Dislike);
+    Comment::factory()->count(3)->for($post)->create();
+
+    asAdmin()->getJson('/api/admin/posts')->assertOk()
+        ->assertJsonPath('data.0.feedback', ['likes' => 2, 'dislikes' => 1, 'comments' => 3]);
+});
+
+it('sorts the post list by an allowed column and ignores unknown ones', function () {
+    $quiet = Post::factory()->create(['episode_number' => 2]);
+    $liked = Post::factory()->create(['episode_number' => 1]);
+    $liked->react(User::factory()->create(), ReactionType::Like);
+
+    $ids = fn (string $query) => collect(asAdmin()->getJson("/api/admin/posts?{$query}")->assertOk()->json('data'))->pluck('id')->all();
+
+    expect($ids('sort=likes_count&descending=1'))->toBe([$liked->id, $quiet->id])
+        ->and($ids('sort=episode_number&descending=0'))->toBe([$liked->id, $quiet->id])
+        ->and($ids('sort=episode_number&descending=1'))->toBe([$quiet->id, $liked->id])
+        ->and($ids('sort=password'))->toBe([$liked->id, $quiet->id]);
 });
