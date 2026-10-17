@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Enums\PostAccess;
 use App\Enums\PostStatus;
+use App\Models\Concerns\HasReactions;
 use Database\Factories\PostFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Builder;
@@ -22,6 +23,8 @@ use Mews\Purifier\Facades\Purifier;
  * @property PostAccess $access
  * @property PostStatus $status
  * @property Carbon|null $published_at
+ * @property int|null $likes_count Only present after scopeWithReactions().
+ * @property int|null $dislikes_count
  * @property int|null $started Only present after withCount in the stats query.
  * @property int|null $completed
  * @property float|string|null $average_listened
@@ -36,7 +39,7 @@ use Mews\Purifier\Facades\Purifier;
 class Post extends Model
 {
     /** @use HasFactory<PostFactory> */
-    use HasFactory, SoftDeletes;
+    use HasFactory, HasReactions, SoftDeletes;
 
     /** @var array<string, mixed> */
     protected $attributes = ['access' => 'premium', 'status' => 'draft'];
@@ -61,6 +64,12 @@ class Post extends Model
     public function tags(): BelongsToMany
     {
         return $this->belongsToMany(Tag::class);
+    }
+
+    /** @return HasMany<Comment, $this> */
+    public function comments(): HasMany
+    {
+        return $this->hasMany(Comment::class);
     }
 
     /** @return HasMany<PlaybackProgress, $this> */

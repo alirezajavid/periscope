@@ -7,6 +7,7 @@ use App\Http\Controllers\Admin\Auth\CsrfTokenController;
 use App\Http\Controllers\Admin\Auth\TwoFactorChallengeController;
 use App\Http\Controllers\Admin\Auth\TwoFactorConfirmController;
 use App\Http\Controllers\Admin\Auth\TwoFactorSetupController;
+use App\Http\Controllers\Admin\CommentController;
 use App\Http\Controllers\Admin\LeakCheckController;
 use App\Http\Controllers\Admin\ListeningStatsController;
 use App\Http\Controllers\Admin\PaymentController;
@@ -53,6 +54,10 @@ Route::middleware(['auth:sanctum', 'admin.idle', 'admin'])->group(function () {
     Route::get('/questions', [QuestionController::class, 'index']);
     Route::post('/questions/{question}/star', [QuestionController::class, 'star']);
     Route::post('/questions/{question}/answer', [QuestionController::class, 'answer']);
+    Route::get('/comments', [CommentController::class, 'index']);
+    Route::post('/comments/{comment}/hide', [CommentController::class, 'hide']);
+    Route::post('/comments/{comment}/unhide', [CommentController::class, 'unhide']);
+    Route::post('/comments/{comment}/reply', [CommentController::class, 'reply']);
     Route::get('/settings', [SettingController::class, 'index']);
     Route::put('/settings', [SettingController::class, 'update']);
     Route::get('/stats/listening', ListeningStatsController::class);

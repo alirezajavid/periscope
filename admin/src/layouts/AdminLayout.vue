@@ -53,6 +53,7 @@ const items = [
   { name: 'users', icon: 'group' },
   { name: 'payments', icon: 'receipt_long' },
   { name: 'questions', icon: 'contact_support' },
+  { name: 'comments', icon: 'forum' },
   { name: 'stats', icon: 'insights' },
   { name: 'leaks', icon: 'travel_explore' },
   { name: 'settings', icon: 'settings' },

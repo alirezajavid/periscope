@@ -51,6 +51,11 @@ class PostResource extends JsonResource
             'audio_duration' => $this->audio_duration,
             'tags' => $this->whenLoaded('tags', fn () => $this->tags->pluck('name')),
             'locked' => ! $canView,
+            // Only on the single-post endpoint, which loads the counts.
+            'reactions' => $this->when(
+                array_key_exists('likes_count', $this->resource->getAttributes()),
+                fn () => $this->reactionSummary($request->user()),
+            ),
             $this->mergeWhen($canView, fn () => [
                 'body' => $this->bodyFor($request),
                 'embed_url' => EmbedUrl::extract($this->embed_code),
