@@ -36,7 +36,11 @@
         <q-td :props="props">
           <div>{{ props.row.user?.name }}</div>
           <div class="text-grey-7 text-caption" dir="ltr">{{ props.row.user?.email }}</div>
-          <q-badge v-if="props.row.author?.is_admin" color="primary" :label="$t('comments.admin')" />
+          <q-badge
+            v-if="props.row.author?.is_admin"
+            color="primary"
+            :label="$t('comments.admin')"
+          />
         </q-td>
       </template>
       <template #body-cell-body="props">
@@ -107,9 +111,13 @@
             <p class="q-mt-sm q-mb-none comment-body">{{ current.body }}</p>
           </q-card-section>
           <q-card-section>
-            <q-banner v-if="form.message.value" class="bg-negative text-white q-mb-md" rounded dense>{{
-              form.message.value
-            }}</q-banner>
+            <q-banner
+              v-if="form.message.value"
+              class="bg-negative text-white q-mb-md"
+              rounded
+              dense
+              >{{ form.message.value }}</q-banner
+            >
             <q-input
               v-model="replyText"
               outlined
@@ -226,7 +234,9 @@ function openReply(row) {
 }
 
 async function submitReply() {
-  const done = await form.submit(() => store.replyToComment(current.value.id, replyText.value.trim()))
+  const done = await form.submit(() =>
+    store.replyToComment(current.value.id, replyText.value.trim()),
+  )
   if (!done) return
   dialogOpen.value = false
   Notify.create({ type: 'positive', message: t('comments.replied') })
